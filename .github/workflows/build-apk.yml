@@ -40,7 +40,7 @@ jobs:
       - name: Compila APK
         run: |
           cd "$(dirname "$(find "$GITHUB_WORKSPACE/android-project" -type f \( -name settings.gradle -o -name settings.gradle.kts \) -print -quit)")"
-          gradle assembleDebug
+          gradle assembleDebug -Pkotlin.jvm.target.validation.mode=warning
 
       - name: Salva APK
         uses: actions/upload-artifact@v4
