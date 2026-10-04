@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#102337">
+<title>Bus Facile</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1521;--panel:#142638;--text:#f4f8fb;--muted:#b8c8d6;--blue:#65c7ff;--green:#7de0b0;--line:#35516a}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#10283d,#09121c 60%);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text);min-height:100vh}
+main{max-width:680px;margin:auto;padding:20px 15px 34px}.brand{display:flex;align-items:center;gap:12px;margin:8px 0 20px}.logo{width:49px;height:49px;border-radius:15px;background:#1d5274;display:grid;place-items:center;font-size:27px}.brand h1{font-size:25px;line-height:1.1;margin:0}.brand p{margin:4px 0 0;color:var(--muted);font-size:14px}
+.card{background:rgba(20,38,56,.97);border:1px solid var(--line);border-radius:18px;padding:17px;margin:13px 0;box-shadow:0 12px 35px #0002}.label{display:block;font-size:14px;color:var(--muted);margin-bottom:7px}input,select{width:100%;padding:14px;border-radius:12px;border:1px solid #49657d;background:#0c1b29;color:var(--text);font-size:16px;outline:none}input:focus,select:focus{border-color:var(--blue)}.field{margin:14px 0}.btn{display:flex;justify-content:center;align-items:center;gap:8px;width:100%;border:0;border-radius:12px;padding:14px 12px;font-size:16px;font-weight:750;cursor:pointer;text-decoration:none;text-align:center}.primary{background:var(--blue);color:#082033}.secondary{background:#25465f;color:white;border:1px solid #41637b}.btn:disabled{opacity:.55}.status{color:var(--muted);font-size:13px;line-height:1.45;margin-top:9px}.position{display:flex;gap:9px;align-items:center;background:#0d1e2d;border:1px solid var(--line);padding:12px;border-radius:12px}.dot{width:9px;height:9px;border-radius:50%;background:var(--green);flex:none}.small{font-size:12px;color:var(--muted);line-height:1.5}.stop{border-top:1px solid var(--line);padding:12px 0}.stop:first-child{border-top:0}.stop strong{color:var(--green)}.stop-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.stop-actions .btn{font-size:13px;padding:11px 8px}.hidden{display:none!important}.warning{border-left:3px solid #f5c76a;padding:10px 12px;background:#2b291f;color:#f9e8be;border-radius:7px;font-size:13px;line-height:1.5}.muted{color:var(--muted)}footer{text-align:center;color:#8ea5b7;font-size:12px;margin-top:20px}
+@media(max-width:400px){.brand h1{font-size:23px}.stop-actions{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+<header class="brand"><div class="logo">🚌</div><div><h1>BUS FACILE</h1><p>Fermate vicine e prossime corse</p></div></header>
+
+<section class="card">
+  <div class="field">
+    <label class="label">Dove ti trovi?</label>
+    <div class="position"><span class="dot"></span><div style="flex:1"><strong id="originText">Posizione non rilevata</strong><div class="small" id="coordText">Premi il pulsante per usare il GPS.</div></div></div>
+    <button class="btn secondary" style="margin-top:9px" id="gpsBtn">📍 Trova fermate vicine</button>
+  </div>
+  <div class="field">
+    <label class="label" for="destination">Dove vuoi andare? (facoltativo)</label>
+    <input id="destination" autocomplete="off" placeholder="Es. centro di Abbiategrasso">
+  </div>
+  <button class="btn primary" id="searchBtn">Cerca autobus per la destinazione →</button>
+  <div class="status" id="status" role="status">Consenti il GPS quando richiesto. Il sito deve essere aperto tramite HTTPS.</div>
+</section>
+
+<section class="card hidden" id="stopsCard">
+  <h2 style="font-size:19px;margin:0 0 5px">Fermate più vicine</h2>
+  <p class="small" style="margin:0 0 8px">Ordinate per distanza dalla tua posizione.</p>
+  <div id="stopsList"></div>
+</section>
+
+<section class="card hidden" id="tripCard">
+  <h2 style="font-size:19px;margin:0 0 8px">Indicazioni per il viaggio</h2>
+  <p class="small" id="tripText"></p>
+  <a class="btn primary" id="googleTransit" target="_blank" rel="noopener">🚌 Vedi percorso e orari su Google Maps</a>
+  <p class="small" style="margin-bottom:0">Google Maps può mostrare alternative e orari disponibili per la destinazione scelta. Controlla sempre il risultato prima di partire.</p>
+</section>
+
+<section class="card">
+  <h2 style="font-size:18px;margin:0 0 8px">Orari ufficiali</h2>
+  <p class="small" style="margin-top:0">Per controllare gli orari pubblicati e gli avvisi delle aziende:</p>
+  <a class="btn secondary" style="margin-bottom:9px" href="https://stavautolinee.it/orari-corse/" target="_blank" rel="noopener">Orari STAV</a>
+  <a class="btn secondary" href="https://movibus.it/" target="_blank" rel="noopener">Sito Movibus</a>
+  <p class="small">Abbonamento indicato: Mi6–Mi7. Verifica che tutte le zone attraversate siano comprese nel titolo di viaggio.</p>
+</section>
+
+<footer>BUS FACILE • Strumento indipendente, non ufficiale</footer>
+</main>
+<script>
+let pos=null;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function status(s){$('status').textContent=s}
+function gmapsWalk(lat,lon,slat,slon){return `https://www.google.com/maps/dir/?api=1&origin=${lat},${lon}&destination=${slat},${slon}&travelmode=walking`}
+function findStops(){
+ if(!navigator.geolocation){status('Il browser non supporta la geolocalizzazione.');return}
+ status('Sto rilevando la posizione…');
+ navigator.geolocation.getCurrentPosition(async p=>{
+  pos={lat:p.coords.latitude,lon:p.coords.longitude};
+  $('originText').textContent='Posizione GPS rilevata';
+  $('coordText').textContent=`${pos.lat.toFixed(5)}, ${pos.lon.toFixed(5)}`;
+  status('Cerco le fermate di autobus vicine…');
+  $('gpsBtn').disabled=true;
+  try{
+   const query=`[out:json][timeout:20];(node(around:1200,${pos.lat},${pos.lon})[highway=bus_stop];node(around:1200,${pos.lat},${pos.lon})[public_transport=platform][bus=yes];way(around:1200,${pos.lat},${pos.lon})[highway=bus_stop];);out center tags;`;
+   const r=await fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(query));
+   if(!r.ok)throw new Error('Servizio fermate non disponibile');
+   const data=await r.json();
+   const stops=(data.elements||[]).map(e=>({name:(e.tags&&(e.tags.name||e.tags.ref))||'Fermata autobus',lat:e.lat??e.center?.lat,lon:e.lon??e.center?.lon,tags:e.tags||{}})).filter(s=>Number.isFinite(s.lat)&&Number.isFinite(s.lon));
+   const unique=[];const seen=new Set();
+   for(const s of stops){const k=s.name+'|'+s.lat.toFixed(4)+'|'+s.lon.toFixed(4);if(!seen.has(k)){seen.add(k);s.distance=distance(pos.lat,pos.lon,s.lat,s.lon);unique.push(s)}}
+   unique.sort((a,b)=>a.distance-b.distance);
+   $('stopsList').innerHTML='';
+   if(!unique.length){$('stopsList').innerHTML='<p class="status">Non ho trovato fermate mappate entro 1,2 km. Prova a ripetere la ricerca o consulta Google Maps.</p>'}
+   else unique.slice(0,5).forEach(s=>{
+    const routes=s.tags.route_ref||s.tags.ref||s.tags.local_ref||'';
+    const div=document.createElement('div');div.className='stop';
+    div.innerHTML=`<strong>${esc(s.name)}</strong><div class="small">${s.distance<1000?Math.round(s.distance)+' m':(s.distance/1000).toFixed(1)+' km'} a piedi circa${routes?' · Linee: '+esc(routes):''}</div><div class="stop-actions"><a class="btn secondary" target="_blank" rel="noopener" href="${gmapsWalk(pos.lat,pos.lon,s.lat,s.lon)}">🚶 Percorso a piedi</a><a class="btn secondary" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${s.lat},${s.lon}">📍 Apri fermata</a></div>`;
+    $('stopsList').appendChild(div);
+   });
+   $('stopsCard').classList.remove('hidden');
+   status(`Trovate ${unique.length} fermate mappate. Ho mostrato le più vicine.`);
+  }catch(e){
+   status('Non riesco a recuperare le fermate in questo momento. Controlla la connessione e riprova.');
+   $('stopsCard').classList.remove('hidden');
+   $('stopsList').innerHTML='<p class="status">Il servizio cartografico non risponde. Puoi cercare fermate direttamente su <a style="color:#65c7ff" href="https://www.google.com/maps/search/bus+stop+near+me/" target="_blank" rel="noopener">Google Maps</a>.</p>';
+  }finally{$('gpsBtn').disabled=false}
+ },e=>{const m={1:'Permesso GPS negato: abilitalo nelle impostazioni del browser.',2:'Posizione non disponibile. Prova all’aperto.',3:'Il GPS ha impiegato troppo tempo: riprova.'};status(m[e.code]||'Non riesco a leggere il GPS.');},{enableHighAccuracy:true,timeout:18000,maximumAge:60000});
+}
+function distance(a,b,c,d){const R=6371000,rad=x=>x*Math.PI/180;const x=rad(c-a),y=rad(d-b);const h=Math.sin(x/2)**2+Math.cos(rad(a))*Math.cos(rad(c))*Math.sin(y/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
+$('gpsBtn').addEventListener('click',findStops);
+$('searchBtn').addEventListener('click',()=>{
+ if(!pos){status('Prima premi “Trova fermate vicine” e autorizza il GPS.');return}
+ const d=$('destination').value.trim();
+ if(!d){status('Se vuoi calcolare un viaggio, scrivi una destinazione. Intanto puoi usare le fermate vicine qui sotto.');$('stopsCard').scrollIntoView({behavior:'smooth'});return}
+ const origin=encodeURIComponent(`${pos.lat},${pos.lon}`);
+ $('googleTransit').href=`https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${encodeURIComponent(d)}&travelmode=transit`;
+ $('tripText').textContent=`Da ${pos.lat.toFixed(5)}, ${pos.lon.toFixed(5)} a ${d}. Google Maps aprirà le opzioni di trasporto pubblico disponibili.`;
+ $('tripCard').classList.remove('hidden');
+ $('tripCard').scrollIntoView({behavior:'smooth',block:'start'});
+});
+</script>
+</body>
+</html>
