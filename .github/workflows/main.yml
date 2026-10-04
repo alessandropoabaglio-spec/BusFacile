@@ -1,0 +1,38 @@
+name: Build Bus Facile APK
+
+on:
+workflow_dispatch:
+push:
+paths:
+- 'app/**'
+- '*.gradle.kts'
+- 'gradle.properties'
+- '.github/workflows/main.yml'
+
+jobs:
+build:
+runs-on: ubuntu-latest
+steps:
+- name: Scarica il progetto
+uses: actions/checkout@v4
+
+  - name: Installa Java
+    uses: actions/setup-java@v4
+    with:
+      distribution: temurin
+      java-version: '17'
+
+  - name: Compila APK
+    uses: android-actions/setup-android@v3
+
+  - name: Prepara Gradle
+    uses: gradle/actions/setup-gradle@v4
+
+  - name: Crea APK
+    run: gradle assembleDebug
+
+  - name: Salva APK
+    uses: actions/upload-artifact@v4
+    with:
+      name: BusFacile-APK
+      path: app/build/outputs/apk/debug/*.apk
