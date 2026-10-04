@@ -12,9 +12,10 @@ paths:
 jobs:
 build:
 runs-on: ubuntu-latest
+
 steps:
-- name: Scarica il progetto
-uses: actions/checkout@v4
+  - name: Scarica il progetto
+    uses: actions/checkout@v4
 
   - name: Installa Java
     uses: actions/setup-java@v4
@@ -22,7 +23,7 @@ uses: actions/checkout@v4
       distribution: temurin
       java-version: '17'
 
-  - name: Compila APK
+  - name: Installa Android SDK
     uses: android-actions/setup-android@v3
 
   - name: Prepara Gradle
