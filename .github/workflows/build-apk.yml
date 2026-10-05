@@ -58,7 +58,7 @@ jobs:
           p.write_text("\n".join(out) + "\n")
           PY
           echo "Dopo la correzione:"
-          grep -n "geolocation" "$MAIN"
+          grep -ni "geolocation" "$MAIN" || true
 
       - name: Prepara Gradle
         uses: gradle/actions/setup-gradle@v4
