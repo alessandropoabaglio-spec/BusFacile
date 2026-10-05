@@ -35,7 +35,10 @@ input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px #75d4ff20
 .secondary{background:#f0f8fd;color:#18506f;border:1px solid #b9d7e7}
 .btn:disabled{opacity:.55}
 .status{color:var(--muted);font-size:13px;line-height:1.5;margin-top:11px;display:flex;gap:8px;align-items:flex-start}
-.status:before{content:"ⓘ";color:var(--blue);font-weight:800}\n.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}\n.mode{border:1px solid #c7dce9;background:#f7fcff;border-radius:17px;padding:15px 12px;text-align:left;color:var(--text);cursor:pointer;transition:.15s;min-height:118px}\n.mode span{display:block;font-size:22px;margin-bottom:8px}.mode strong{display:block;font-size:14px;margin-bottom:5px}.mode small{display:block;color:var(--muted);font-size:11px;line-height:1.4}.mode.active{border-color:#58bafa;background:linear-gradient(145deg,#e8f8ff,#d7f1ff);box-shadow:0 7px 20px #38a8ed1c}\n.plan-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.choice-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.choice{display:flex;align-items:center;gap:8px;padding:12px;border:1px solid #c7dce9;border-radius:13px;background:#f8fcff;font-size:13px;font-weight:700;cursor:pointer}.choice input{width:auto;padding:0;box-shadow:none}\n@media(max-width:400px){main{padding:14px 12px 30px}.brand h1{font-size:23px}.top-tag{font-size:10px;padding:5px 7px}.hero{padding:17px 15px}.hero h2{font-size:21px}.stop-actions{grid-template-columns:1fr}.mode-grid,.plan-fields,.choice-row{grid-template-columns:1fr}}
+.status:before{content:"ⓘ";color:var(--blue);font-weight:800}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mode{border:1px solid #c7dce9;background:#f7fcff;border-radius:17px;padding:15px 12px;text-align:left;color:var(--text);cursor:pointer;transition:.15s;min-height:118px}\n.mode span{display:block;font-size:22px;margin-bottom:8px}.mode strong{display:block;font-size:14px;margin-bottom:5px}.mode small{display:block;color:var(--muted);font-size:11px;line-height:1.4}.mode.active{border-color:#58bafa;background:linear-gradient(145deg,#e8f8ff,#d7f1ff);box-shadow:0 7px 20px #38a8ed1c}
+.plan-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.choice-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.choice{display:flex;align-items:center;gap:8px;padding:12px;border:1px solid #c7dce9;border-radius:13px;background:#f8fcff;font-size:13px;font-weight:700;cursor:pointer}.choice input{width:auto;padding:0;box-shadow:none}\n@media(max-width:400px){main{padding:14px 12px 30px}.brand h1{font-size:23px}.top-tag{font-size:10px;padding:5px 7px}.hero{padding:17px 15px}.hero h2{font-size:21px}.stop-actions{grid-template-columns:1fr}.mode-grid,.plan-fields,.choice-row{grid-template-columns:1fr}}
 .position{display:flex;gap:11px;align-items:center;background:#f7fcff;border:1px solid #c9dfeb;padding:13px;border-radius:15px}
 .dot{width:11px;height:11px;border-radius:50%;background:var(--green);box-shadow:0 0 0 5px #83e4b61a;flex:none}
 .small{font-size:12px;color:var(--muted);line-height:1.55}
@@ -58,6 +61,14 @@ a:not(.btn){color:var(--blue)}
 <main>
 <header class="brand"><div class="logo">🚌</div><div><h1>BUS FACILE</h1><p>Il prossimo autobus, più semplice.</p></div><div class="top-tag">● LIVE GPS</div></header>
 <section class="hero"><div class="eyebrow">Muoviti facile</div><h2>Da qui, a dove vuoi.</h2><p>Trova le fermate intorno a te e apri il percorso a piedi più comodo. Inserisci una destinazione per consultare le opzioni di viaggio.</p></section>
+
+<section class="card mode-card">
+  <div class="section-head"><div class="section-icon">🧭</div><div><h2>Come vuoi viaggiare?</h2><div class="small">Scegli se partire adesso o organizzare il viaggio.</div></div></div>
+  <div class="mode-grid">
+    <button class="mode active" id="nowMode"><span>⚡</span><strong>Viaggio adesso</strong><small>Trova fermate e collegamenti vicini a te</small></button>
+    <button class="mode" id="planMode"><span>📅</span><strong>Programma viaggio</strong><small>Scegli data, ora, partenza e destinazione</small></button>
+  </div>
+</section>
 
 <section class="card">
   <div class="section-head"><div class="section-icon">📍</div><h2>Parti dalla tua posizione</h2></div>
