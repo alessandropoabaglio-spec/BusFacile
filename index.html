@@ -79,26 +79,49 @@ a:not(.btn){color:var(--blue)}
 <section class="card"><div class="section-head"><div class="section-icon">📍</div><h2>Il tuo viaggio</h2></div>
 <div class="field"><label class="label">Partenza</label><div class="position"><span class="dot"></span><div style="flex:1"><strong id="originText">Usa la mia posizione</strong><div class="small" id="coordText">Il GPS individuerà automaticamente il punto di partenza.</div></div></div><button class="btn secondary" id="gpsBtn" style="margin-top:9px">📍 Usa posizione GPS</button></div>
 <div class="field"><label class="label" for="destination">🎯 Destinazione</label><input id="destination" autocomplete="off" placeholder="Es. Stazione di Magenta, Milano, via Roma..."></div>
-<div id="planFields" class="hidden"><div class="field"><label class="label">Quando?</label><div class="plan-fields"><input id="travelDate" type="date" aria-label="Data del viaggio"><input id="travelTime" type="time" aria-label="Ora del viaggio"></div></div><div class="choice-row"><label class="choice"><input type="radio" name="when" value="depart" checked> Partire alle</label><label class="choice"><input type="radio" name="when" value="arrive"> Arrivare entro</label></div></div>
-<button class="btn primary" id="searchBtn">🔎 Trova il percorso migliore</button><div class="status" id="status">Prima individuiamo la posizione, poi cerchiamo il percorso e le prossime partenze.</div></section>
-<section class="card hidden" id="resultsCard"><div class="section-head"><div class="section-icon">⭐</div><div><h2>Soluzione migliore</h2><div class="small" id="resultSummary"></div></div></div><div id="resultList"></div><div class="notice">I risultati reali verranno alimentati dai dati ufficiali del trasporto pubblico lombardo.</div></section>
+<div id="planFields" class="hidden">
+<div class="field"><label class="label" for="plannedOrigin">🚏 Partenza da</label><input id="plannedOrigin" autocomplete="off" placeholder="Es. Magenta, Stazione di Magenta, via Roma..."><div class="small" style="margin-top:7px">Per un viaggio programmato puoi scegliere un punto di partenza diverso dalla tua posizione GPS.</div></div>
+<div class="field"><label class="label">Quando?</label><div class="plan-fields"><input id="travelDate" type="date" aria-label="Data del viaggio"><input id="travelTime" type="time" aria-label="Ora del viaggio"></div></div><div class="choice-row"><label class="choice"><input type="radio" name="when" value="depart" checked> Partire alle</label><label class="choice"><input type="radio" name="when" value="arrive"> Arrivare entro</label></div></div>
+<button class="btn primary" id="searchBtn">🔎 Trova il percorso migliore</button><div class="status" id="status">Per un viaggio immediato usiamo il GPS. Per un viaggio programmato puoi indicare una partenza diversa.</div></section>
+<section class="card hidden" id="resultsCard"><div class="section-head"><div class="section-icon">⭐</div><div><h2>Soluzione migliore</h2><div class="small" id="resultSummary"></div></div></div><div id="resultList"></div><div class="notice">Per i viaggi programmati la partenza viene usata come punto scelto da te, non come posizione GPS. Il vincolo “Arrivare entro” viene mantenuto nella richiesta del viaggio; il collegamento Google Maps viene usato come fallback.</div></section>
 <section class="card hidden" id="arrivalCard"><div class="section-head"><div class="section-icon">🔔</div><div><h2>Avviso di arrivo</h2><div class="small">Ti avvisiamo prima dell'ultima fermata.</div></div></div><label class="notify-toggle"><input type="checkbox" id="arrivalNotify"><span></span><b>Avvisami quando sto per arrivare</b></label><div class="small" id="arrivalStatus">L'avviso si attiverà quando il percorso avrà identificato la fermata finale.</div><button class="btn secondary" id="voiceTest" style="margin-top:10px">🔊 Prova voce</button></section>
 <section class="card"><div class="section-head"><div class="section-icon">🛡️</div><div><h2>Come funziona</h2></div></div><p class="small" style="margin:0">Bus Facile non usa il tuo abbonamento come filtro del percorso. L'obiettivo è confrontare il trasporto pubblico disponibile nella zona e proporti la soluzione più rapida, con meno cambi o con meno attesa.</p></section>
 <footer>BUS FACILE • Strumento indipendente, non ufficiale</footer>
 </main>
 <script>
-let pos=null,destinationPoint=null,finalStop=null,watchId=null,alertDone=false;
+let pos=null,originPoint=null,destinationPoint=null,finalStop=null,watchId=null,alertDone=false;
 const $=id=>document.getElementById(id); function status(s){$('status').textContent=s}
 function initDate(){const d=new Date();d.setMinutes(d.getMinutes()+5);$('travelDate').value=d.toISOString().slice(0,10);$('travelTime').value=d.toTimeString().slice(0,5)} initDate();
-$('nowMode').onclick=()=>{$('nowMode').classList.add('active');$('planMode').classList.remove('active');$('planFields').classList.add('hidden');status('Viaggio adesso: cercheremo le prossime partenze.')};
-$('planMode').onclick=()=>{$('planMode').classList.add('active');$('nowMode').classList.remove('active');$('planFields').classList.remove('hidden');status('Viaggio programmato: scegli giorno, ora e se vuoi partire o arrivare entro quell’orario.')};
+$('nowMode').onclick=()=>{$('nowMode').classList.add('active');$('planMode').classList.remove('active');$('planFields').classList.add('hidden');$('originText').textContent=pos?'Posizione GPS rilevata':'Usa la mia posizione';$('coordText').textContent=pos?pos.lat.toFixed(5)+', '+pos.lon.toFixed(5):'Il GPS individuerà automaticamente il punto di partenza.';status('Viaggio adesso: useremo la tua posizione GPS.')};
+$('planMode').onclick=()=>{$('planMode').classList.add('active');$('nowMode').classList.remove('active');$('planFields').classList.remove('hidden');status('Viaggio programmato: indica da dove vuoi partire, poi giorno, ora e se vuoi partire o arrivare entro quell’orario.')};
 $('gpsBtn').onclick=()=>{if(!navigator.geolocation){status('Questo dispositivo non supporta il GPS.');return}status('Rilevo la posizione…');navigator.geolocation.getCurrentPosition(p=>{pos={lat:p.coords.latitude,lon:p.coords.longitude};$('originText').textContent='Posizione GPS rilevata';$('coordText').textContent=pos.lat.toFixed(5)+', '+pos.lon.toFixed(5);$('gpsBtn').textContent='✓ Posizione acquisita';status('Posizione acquisita. Ora inserisci la destinazione.')},e=>status(e.code===1?'Permesso GPS negato. Abilita la posizione nel browser.':'Non riesco a rilevare la posizione. Riprova.'),{enableHighAccuracy:true,timeout:15000,maximumAge:30000})};
 async function geocode(q){const r=await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=it&q='+encodeURIComponent(q),{headers:{Accept:'application/json'}});if(!r.ok)throw new Error('geocoding');const a=await r.json();if(!a.length)throw new Error('destinazione');return{lat:Number(a[0].lat),lon:Number(a[0].lon),name:a[0].display_name}}
-$('searchBtn').onclick=async()=>{if(!pos){status('Prima premi “Usa posizione GPS”.');return}const destination=$('destination').value.trim();if(!destination){status('Inserisci una destinazione.');$('destination').focus();return}status('Cerco destinazione e preparo la ricerca del trasporto pubblico…');$('searchBtn').disabled=true;try{destinationPoint=await geocode(destination);$('resultsCard').classList.remove('hidden');$('arrivalCard').classList.remove('hidden');$('resultSummary').textContent=destinationPoint.name.split(',').slice(0,2).join(',');$('resultList').innerHTML='<div class="route-placeholder"><div class="route-spinner">🚌</div><strong>Destinazione trovata</strong><span>Sto preparando il percorso solo in autobus. Se il motore TPL interno non è disponibile, puoi aprire il percorso in Google Maps.</span><div class="route-actions"><button class="btn primary" id="googleRouteBtn">🗺️ Apri percorso in Google Maps</button></div></div>';$('googleRouteBtn').onclick=()=>openGoogleTransit();status('Destinazione trovata. Puoi calcolare il percorso con Google Maps mentre colleghiamo il motore TPL interno.')}catch(e){status(e.message==='destinazione'?'Non trovo la destinazione. Prova con città e via.':'Errore durante la ricerca. Riprova.')}finally{$('searchBtn').disabled=false}};
+$('searchBtn').onclick=async()=>{
+ const planned=$('planMode').classList.contains('active');
+ const destination=$('destination').value.trim();
+ if(!destination){status('Inserisci una destinazione.');$('destination').focus();return}
+ if(planned){
+   const origin=$('plannedOrigin').value.trim();
+   if(!origin){status('Per un viaggio programmato inserisci anche “Partenza da”.');$('plannedOrigin').focus();return}
+ }else if(!pos){status('Prima premi “Usa posizione GPS”.');return}
+ status(planned?'Cerco partenza, destinazione e preparo il viaggio programmato…':'Cerco destinazione e preparo la ricerca del trasporto pubblico…');
+ $('searchBtn').disabled=true;
+ try{
+   originPoint=planned?await geocode($('plannedOrigin').value.trim()):{...pos,name:'Posizione GPS'};
+   destinationPoint=await geocode(destination);
+   const when=document.querySelector('input[name="when"]:checked')?.value||'depart';
+   const date=$('travelDate').value, time=$('travelTime').value;
+   $('resultsCard').classList.remove('hidden');$('arrivalCard').classList.remove('hidden');
+   $('resultSummary').textContent=originPoint.name.split(',').slice(0,2).join(',')+' → '+destinationPoint.name.split(',').slice(0,2).join(',');
+   const constraint=planned?(when==='arrive'?'Arrivare entro '+time:'Partire alle '+time):'Partire adesso';
+   $('resultList').innerHTML='<div class="route-placeholder"><div class="route-spinner">🚌</div><strong>'+constraint+'</strong><span>Partenza: '+originPoint.name.split(',').slice(0,2).join(', ')+'<br>Destinazione: '+destinationPoint.name.split(',').slice(0,2).join(', ')+'</span><div class="route-actions"><button class="btn primary" id="googleRouteBtn">🗺️ Apri percorso in Google Maps</button></div></div>';
+   $('googleRouteBtn').onclick=()=>openGoogleTransit();
+   status(planned?(when==='arrive'?'Vincolo “Arrivare entro” impostato alle '+time+'.':'Vincolo “Partire alle” impostato alle '+time+'.'):'Destinazione trovata. Percorso dalla posizione GPS.');
+ }catch(e){status(e.message==='destinazione'?'Non trovo la destinazione. Prova con città e via.':'Non trovo il punto di partenza. Prova con città e via.')}finally{$('searchBtn').disabled=false}
+};
 function openGoogleTransit(){
- if(!pos||!destinationPoint)return;
- const transit='transit';
- const url='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(pos.lat+','+pos.lon)+'&destination='+encodeURIComponent(destinationPoint.lat+','+destinationPoint.lon)+'&travelmode='+transit+'&transit_mode=bus&dir_action=navigate';
+ if(!originPoint||!destinationPoint)return;
+ const url='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(originPoint.lat+','+originPoint.lon)+'&destination='+encodeURIComponent(destinationPoint.lat+','+destinationPoint.lon)+'&travelmode=transit&transit_mode=bus';
  window.open(url,'_blank');
 }
 $('arrivalNotify').onchange=()=>{if($('arrivalNotify').checked){if(!finalStop){$('arrivalStatus').textContent='Attivata: appena il percorso fornirà la fermata finale, Bus Facile inizierà a controllare la posizione.';return}startArrivalWatch()}else{stopArrivalWatch();$('arrivalStatus').textContent='Avviso disattivato.'}};
