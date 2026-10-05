@@ -55,165 +55,49 @@ input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px #75d4ff20
 footer{text-align:center;color:#7f98ab;font-size:11px;margin-top:22px;line-height:1.6}
 a:not(.btn){color:var(--blue)}
 @media(max-width:400px){main{padding:14px 12px 30px}.brand h1{font-size:23px}.top-tag{font-size:10px;padding:5px 7px}.hero{padding:17px 15px}.hero h2{font-size:21px}.stop-actions{grid-template-columns:1fr}}
-</style>
+<style>
+#map{height:330px;border-radius:17px;overflow:hidden;border:1px solid #cfe4f2;background:#eaf5fb}
+.map-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:11px;color:#60798c}
+.route-placeholder{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:24px 12px;border:1px dashed #b9d7e7;border-radius:16px;background:#f8fcff;color:#60798c}
+.route-placeholder strong{color:#173e55;font-size:15px}.route-spinner{font-size:26px}.notify-toggle{display:flex;align-items:center;gap:10px;padding:14px;border:1px solid #c7dce9;border-radius:14px;background:#f8fcff;cursor:pointer}.notify-toggle input{width:auto}.notify-toggle b{font-size:13px}
+.choice-row{display:grid;grid-template-columns:1fr;gap:8px}.choice{display:flex;align-items:center;gap:8px;padding:12px;border:1px solid #c7dce9;border-radius:13px;background:#f8fcff;font-size:13px;font-weight:700;cursor:pointer}.choice input{width:auto;padding:0;box-shadow:none}
+@media(min-width:500px){.choice-row{grid-template-columns:1fr 1fr 1fr}}
+</style></style>
 </head>
+<!-- Bus Facile redesigned trip planner -->
 <body>
 <main>
-<header class="brand"><div class="logo">🚌</div><div><h1>BUS FACILE</h1><p>Il prossimo autobus, più semplice.</p></div><div class="top-tag">● LIVE GPS</div></header>
-<section class="hero"><div class="eyebrow">Muoviti facile</div><h2>Da qui, a dove vuoi.</h2><p>Trova le fermate intorno a te e apri il percorso a piedi più comodo. Inserisci una destinazione per consultare le opzioni di viaggio.</p></section>
-
-<section class="card mode-card">
-  <div class="section-head"><div class="section-icon">🧭</div><div><h2>Come vuoi viaggiare?</h2><div class="small">Scegli se partire adesso o organizzare il viaggio.</div></div></div>
-  <div class="mode-grid">
-    <button class="mode active" id="nowMode"><span>⚡</span><strong>Viaggio adesso</strong><small>Trova fermate e collegamenti vicini a te</small></button>
-    <button class="mode" id="planMode"><span>📅</span><strong>Programma viaggio</strong><small>Scegli data, ora, partenza e destinazione</small></button>
-  </div>
-</section>
-
-<section class="card">
-  <div class="section-head"><div class="section-icon">📍</div><h2>Parti dalla tua posizione</h2></div>
-  <div class="field">
-    <label class="label">Dove ti trovi?</label>
-    <div class="position"><span class="dot"></span><div style="flex:1"><strong id="originText">Posizione non rilevata</strong><div class="small" id="coordText">Premi il pulsante per usare il GPS.</div></div></div>
-    <button class="btn secondary" style="margin-top:9px" id="gpsBtn">📍 Trova fermate vicine</button>
-  </div>
-  <div class="divider"></div>
-  <div class="field">
-    <label class="label" for="destination">🎯 Dove vuoi andare? <span class="muted">(facoltativo)</span></label>
-    <input id="destination" autocomplete="off" placeholder="Es. centro di Abbiategrasso">
-  </div>
-  <div id="instantActions">
-  <button class="btn primary" id="searchBtn">Cerca collegamenti per la destinazione →</button>
-</div>
-<div id="planActions" class="hidden">
-  <div class="field">
-    <label class="label">Quando vuoi viaggiare?</label>
-    <div class="plan-fields">
-      <input id="travelDate" type="date" aria-label="Data del viaggio">
-      <input id="travelTime" type="time" aria-label="Ora del viaggio" value="08:00">
-    </div>
-  </div>
-  <div class="field">
-    <label class="label">Preferisci...</label>
-    <div class="choice-row">
-      <label class="choice"><input type="radio" name="when" value="depart" checked> Partire alle</label>
-      <label class="choice"><input type="radio" name="when" value="arrive"> Arrivare entro</label>
-    </div>
-  </div>
-  <button class="btn primary" id="planBtn">📅 Cerca il viaggio programmato →</button>
-</div>
-  <div class="status" id="status" role="status">Il GPS serve per trovare la fermata più vicina. Per un viaggio programmato puoi scegliere data e ora.</div>
-</section>
-
-<section class="card hidden" id="stopsCard">
-  <div class="section-head"><div class="section-icon">🚌</div><h2>Fermate più vicine</h2></div>
-  <p class="small" style="margin:0 0 8px">Ordinate per distanza dalla tua posizione.</p>
-  <div id="stopsList"></div>
-</section>
-
-<section class="card hidden" id="tripCard">
-  <div class="section-head"><div class="section-icon">🧭</div><h2>Il tuo viaggio</h2></div>
-  <p class="small" id="tripText"></p>
-  <a class="btn primary" id="googleTransit" target="_blank" rel="noopener">🚌 Vedi percorso e orari</a>
-  <p class="small" style="margin-bottom:0">La ricerca considera i collegamenti di trasporto pubblico disponibili, non solo un singolo abbonamento. Controlla sempre il risultato prima di partire.</p>
-</section>
-
-<section class="card">
-  <div class="section-head"><div class="section-icon">🕒</div><h2>Orari ufficiali</h2></div>
-  <p class="small" style="margin-top:0">Per controllare gli orari pubblicati e gli avvisi delle aziende:</p>
-  <a class="btn secondary" style="margin-bottom:9px" href="https://stavautolinee.it/orari-corse/" target="_blank" rel="noopener">Orari STAV</a>
-  <a class="btn secondary" href="https://movibus.it/" target="_blank" rel="noopener">Sito Movibus</a>
-  <p class="small">Abbonamento indicato: Mi6–Mi7. Verifica che tutte le zone attraversate siano comprese nel titolo di viaggio.</p>
-</section>
-
+<header class="brand"><div class="logo">🚌</div><div><h1>BUS FACILE</h1><p>Il modo più semplice per arrivare dove vuoi.</p></div><div class="top-tag">● GPS</div></header>
+<section class="hero"><div class="eyebrow">Trasporto pubblico intelligente</div><h2>Dimmi dove vuoi andare. Al resto pensiamo noi.</h2><p>Bus, treno o combinazione dei due: Bus Facile cercherà il collegamento più conveniente e gli orari più vicini.</p></section>
+<section class="card"><div class="section-head"><div class="section-icon">🧭</div><div><h2>Come vuoi viaggiare?</h2><div class="small">Puoi partire subito oppure programmare il viaggio.</div></div></div>
+<div class="mode-grid"><button class="mode active" id="nowMode"><span>⚡</span><strong>Viaggio adesso</strong><small>Trova la soluzione migliore in partenza ora</small></button><button class="mode" id="planMode"><span>📅</span><strong>Programma viaggio</strong><small>Scegli giorno e ora per domani o un'altra data</small></button></div></section>
+<section class="card"><div class="section-head"><div class="section-icon">📍</div><h2>Il tuo viaggio</h2></div>
+<div class="field"><label class="label">Partenza</label><div class="position"><span class="dot"></span><div style="flex:1"><strong id="originText">Usa la mia posizione</strong><div class="small" id="coordText">Il GPS individuerà automaticamente il punto di partenza.</div></div></div><button class="btn secondary" id="gpsBtn" style="margin-top:9px">📍 Usa posizione GPS</button></div>
+<div class="field"><label class="label" for="destination">🎯 Destinazione</label><input id="destination" autocomplete="off" placeholder="Es. Stazione di Magenta, Milano, via Roma..."></div>
+<div class="field"><label class="label">Mezzo preferito</label><div class="choice-row"><label class="choice"><input type="radio" name="mode" value="both" checked> 🚌🚆 Bus + treno</label><label class="choice"><input type="radio" name="mode" value="bus"> 🚌 Solo bus</label><label class="choice"><input type="radio" name="mode" value="train"> 🚆 Solo treno</label></div></div>
+<div id="planFields" class="hidden"><div class="field"><label class="label">Quando?</label><div class="plan-fields"><input id="travelDate" type="date" aria-label="Data del viaggio"><input id="travelTime" type="time" aria-label="Ora del viaggio"></div></div><div class="choice-row"><label class="choice"><input type="radio" name="when" value="depart" checked> Partire alle</label><label class="choice"><input type="radio" name="when" value="arrive"> Arrivare entro</label></div></div>
+<button class="btn primary" id="searchBtn">🔎 Trova il percorso migliore</button><div class="status" id="status">Prima individuiamo la posizione, poi cerchiamo il percorso e le prossime partenze.</div></section>
+<section class="card hidden" id="resultsCard"><div class="section-head"><div class="section-icon">⭐</div><div><h2>Soluzione migliore</h2><div class="small" id="resultSummary"></div></div></div><div id="resultList"></div><div class="notice">I risultati reali verranno alimentati dai dati ufficiali del trasporto pubblico lombardo.</div></section>
+<section class="card hidden" id="mapCard"><div class="section-head"><div class="section-icon">🗺️</div><div><h2>Il percorso</h2><div class="small">Linea, fermate e posizione del mezzo quando disponibile.</div></div></div><div id="map"></div><div class="map-legend"><span>🔵 La tua posizione</span><span>🚌 Percorso bus</span><span>🚆 Treno</span><span>📍 Fermate</span></div></section>
+<section class="card hidden" id="arrivalCard"><div class="section-head"><div class="section-icon">🔔</div><div><h2>Avviso di arrivo</h2><div class="small">Ti avvisiamo prima dell'ultima fermata.</div></div></div><label class="notify-toggle"><input type="checkbox" id="arrivalNotify"><span></span><b>Avvisami quando sto per arrivare</b></label><div class="small" id="arrivalStatus">L'avviso si attiverà quando il percorso avrà identificato la fermata finale.</div><button class="btn secondary" id="voiceTest" style="margin-top:10px">🔊 Prova voce</button></section>
+<section class="card"><div class="section-head"><div class="section-icon">🛡️</div><div><h2>Come funziona</h2></div></div><p class="small" style="margin:0">Bus Facile non usa il tuo abbonamento come filtro del percorso. L'obiettivo è confrontare il trasporto pubblico disponibile nella zona e proporti la soluzione più rapida, con meno cambi o con meno attesa.</p></section>
 <footer>BUS FACILE • Strumento indipendente, non ufficiale</footer>
 </main>
 <script>
-let pos=null;
-const $=id=>document.getElementById(id);
-const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function status(s){$('status').textContent=s}
-function gmapsWalk(lat,lon,slat,slon){return `https://www.google.com/maps/dir/?api=1&origin=${lat},${lon}&destination=${slat},${slon}&travelmode=walking`}
-function findStops(){
- if(!navigator.geolocation){status('Il browser non supporta la geolocalizzazione.');return}
- status('Sto rilevando la posizione…');
- navigator.geolocation.getCurrentPosition(async p=>{
-  pos={lat:p.coords.latitude,lon:p.coords.longitude};
-  $('originText').textContent='Posizione GPS rilevata';
-  $('coordText').textContent=`${pos.lat.toFixed(5)}, ${pos.lon.toFixed(5)}`;
-  status('Cerco le fermate di autobus vicine…');
-  $('gpsBtn').disabled=true;
-  try{
-   const query=`[out:json][timeout:20];(node(around:1200,${pos.lat},${pos.lon})[highway=bus_stop];node(around:1200,${pos.lat},${pos.lon})[public_transport=platform][bus=yes];way(around:1200,${pos.lat},${pos.lon})[highway=bus_stop];);out center tags;`;
-   const r=await fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(query));
-   if(!r.ok)throw new Error('Servizio fermate non disponibile');
-   const data=await r.json();
-   const stops=(data.elements||[]).map(e=>({name:(e.tags&&(e.tags.name||e.tags.ref))||'Fermata autobus',lat:e.lat??e.center?.lat,lon:e.lon??e.center?.lon,tags:e.tags||{}})).filter(s=>Number.isFinite(s.lat)&&Number.isFinite(s.lon));
-   const unique=[];const seen=new Set();
-   for(const s of stops){const k=s.name+'|'+s.lat.toFixed(4)+'|'+s.lon.toFixed(4);if(!seen.has(k)){seen.add(k);s.distance=distance(pos.lat,pos.lon,s.lat,s.lon);unique.push(s)}}
-   unique.sort((a,b)=>a.distance-b.distance);
-   $('stopsList').innerHTML='';
-   if(!unique.length){$('stopsList').innerHTML='<p class="status">Non ho trovato fermate mappate entro 1,2 km. Prova a ripetere la ricerca o consulta Google Maps.</p>'}
-   else unique.slice(0,5).forEach(s=>{
-    const routes=s.tags.route_ref||s.tags.ref||s.tags.local_ref||'';
-    const div=document.createElement('div');div.className='stop';
-    div.innerHTML=`<strong>${esc(s.name)}</strong><div class="small">${s.distance<1000?Math.round(s.distance)+' m':(s.distance/1000).toFixed(1)+' km'} a piedi circa${routes?' · Linee: '+esc(routes):''}</div><div class="stop-actions"><a class="btn secondary" target="_blank" rel="noopener" href="${gmapsWalk(pos.lat,pos.lon,s.lat,s.lon)}">🚶 Percorso a piedi</a><a class="btn secondary" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${s.lat},${s.lon}">📍 Apri fermata</a></div>`;
-    $('stopsList').appendChild(div);
-   });
-   $('stopsCard').classList.remove('hidden');
-   status(`Trovate ${unique.length} fermate mappate. Ho mostrato le più vicine.`);
-  }catch(e){
-   status('Non riesco a recuperare le fermate in questo momento. Controlla la connessione e riprova.');
-   $('stopsCard').classList.remove('hidden');
-   $('stopsList').innerHTML='<p class="status">Il servizio cartografico non risponde. Puoi cercare fermate direttamente su <a style="color:#65c7ff" href="https://www.google.com/maps/search/bus+stop+near+me/" target="_blank" rel="noopener">Google Maps</a>.</p>';
-  }finally{$('gpsBtn').disabled=false}
- },e=>{const m={1:'Permesso GPS negato: abilitalo nelle impostazioni del browser.',2:'Posizione non disponibile. Prova all’aperto.',3:'Il GPS ha impiegato troppo tempo: riprova.'};status(m[e.code]||'Non riesco a leggere il GPS.');},{enableHighAccuracy:true,timeout:18000,maximumAge:60000});
-}
-function distance(a,b,c,d){const R=6371000,rad=x=>x*Math.PI/180;const x=rad(c-a),y=rad(d-b);const h=Math.sin(x/2)**2+Math.cos(rad(a))*Math.cos(rad(c))*Math.sin(y/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
-$('gpsBtn').addEventListener('click',findStops);
-
-$('nowMode').addEventListener('click',()=>{
- mode='now'; $('nowMode').classList.add('active'); $('planMode').classList.remove('active');
- $('instantActions').classList.remove('hidden'); $('planActions').classList.add('hidden');
- status('Modalità viaggio adesso: troviamo le fermate vicine e i collegamenti disponibili.');
-});
-$('planMode').addEventListener('click',()=>{
- mode='plan'; $('planMode').classList.add('active'); $('nowMode').classList.remove('active');
- $('instantActions').classList.add('hidden'); $('planActions').classList.remove('hidden');
- status('Modalità programma viaggio: scegli data, ora e destinazione.');
-});
-function buildTransitUrl(destination,date,time,when){
- const [y,m,d]=date.split('-').map(Number),[hh,mm]=time.split(':').map(Number);
- const dt=new Date(y,m-1,d,hh,mm,0);
- const seconds=Math.floor(dt.getTime()/1000);
- const params=new URLSearchParams({api:'1',origin:`${pos.lat},${pos.lon}`,destination,travelmode:'transit'});
- params.set(when==='arrive'?'arrival_time':'departure_time',String(seconds));
- return 'https://www.google.com/maps/dir/?'+params.toString();
-}
-$('planBtn').addEventListener('click',()=>{
- if(!pos){status('Prima premi “Trova fermate vicine” e autorizza il GPS.');return}
- const d=$('destination').value.trim();
- if(!d){status('Inserisci prima una destinazione, ad esempio una città o una via.');$('destination').focus();return}
- const date=$('travelDate').value,time=$('travelTime').value;
- if(!date||!time){status('Scegli data e ora del viaggio.');return}
- const when=document.querySelector('input[name="when"]:checked').value;
- $('googleTransit').href=buildTransitUrl(d,date,time,when);
- const whenText=when==='arrive'?'arrivare entro':'partire alle';
- $('tripText').textContent=`Viaggio programmato per ${date.split('-').reverse().join('/')} alle ${time}, con obiettivo di ${whenText} ${time}, da ${pos.lat.toFixed(5)}, ${pos.lon.toFixed(5)} verso ${d}. La ricerca usa il trasporto pubblico disponibile.`;
- $('tripCard').classList.remove('hidden');
- $('tripCard').scrollIntoView({behavior:'smooth',block:'start'});
-});
-
-$('searchBtn').addEventListener('click',()=>{
- if(!pos){status('Prima premi “Trova fermate vicine” e autorizza il GPS.');return}
- const d=$('destination').value.trim();
- if(!d){status('Se vuoi calcolare un viaggio, scrivi una destinazione. Intanto puoi usare le fermate vicine qui sotto.');$('stopsCard').scrollIntoView({behavior:'smooth'});return}
- const origin=encodeURIComponent(`${pos.lat},${pos.lon}`);
- $('googleTransit').href=`https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${encodeURIComponent(d)}&travelmode=transit`;
- $('tripText').textContent=`Da ${pos.lat.toFixed(5)}, ${pos.lon.toFixed(5)} a ${d}. Google Maps aprirà le opzioni di trasporto pubblico disponibili.`;
- $('tripCard').classList.remove('hidden');
- $('tripCard').scrollIntoView({behavior:'smooth',block:'start'});
-});
+let pos=null,map=null,userMarker=null,routeLayer=null,destinationPoint=null,finalStop=null,watchId=null,alertDone=false;
+const $=id=>document.getElementById(id); function status(s){$('status').textContent=s}
+function initDate(){const d=new Date();d.setMinutes(d.getMinutes()+5);$('travelDate').value=d.toISOString().slice(0,10);$('travelTime').value=d.toTimeString().slice(0,5)} initDate();
+$('nowMode').onclick=()=>{$('nowMode').classList.add('active');$('planMode').classList.remove('active');$('planFields').classList.add('hidden');status('Viaggio adesso: cercheremo le prossime partenze.')};
+$('planMode').onclick=()=>{$('planMode').classList.add('active');$('nowMode').classList.remove('active');$('planFields').classList.remove('hidden');status('Viaggio programmato: scegli giorno, ora e se vuoi partire o arrivare entro quell’orario.')};
+$('gpsBtn').onclick=()=>{if(!navigator.geolocation){status('Questo dispositivo non supporta il GPS.');return}status('Rilevo la posizione…');navigator.geolocation.getCurrentPosition(p=>{pos={lat:p.coords.latitude,lon:p.coords.longitude};$('originText').textContent='Posizione GPS rilevata';$('coordText').textContent=pos.lat.toFixed(5)+', '+pos.lon.toFixed(5);$('gpsBtn').textContent='✓ Posizione acquisita';status('Posizione acquisita. Ora inserisci la destinazione.');showMap()},e=>status(e.code===1?'Permesso GPS negato. Abilita la posizione nel browser.':'Non riesco a rilevare la posizione. Riprova.'),{enableHighAccuracy:true,timeout:15000,maximumAge:30000})};
+function showMap(){$('mapCard').classList.remove('hidden');if(map)return;const s=document.createElement('script');s.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';s.onload=()=>{map=L.map('map').setView([pos.lat,pos.lon],14);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors'}).addTo(map);userMarker=L.marker([pos.lat,pos.lon]).addTo(map).bindPopup('Partenza')};document.head.appendChild(s)}
+async function geocode(q){const r=await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=it&q='+encodeURIComponent(q),{headers:{Accept:'application/json'}});if(!r.ok)throw new Error('geocoding');const a=await r.json();if(!a.length)throw new Error('destinazione');return{lat:Number(a[0].lat),lon:Number(a[0].lon),name:a[0].display_name}}
+$('searchBtn').onclick=async()=>{if(!pos){status('Prima premi “Usa posizione GPS”.');return}const destination=$('destination').value.trim();if(!destination){status('Inserisci una destinazione.');$('destination').focus();return}status('Cerco destinazione e preparo la ricerca del trasporto pubblico…');$('searchBtn').disabled=true;try{destinationPoint=await geocode(destination);$('resultsCard').classList.remove('hidden');$('mapCard').classList.remove('hidden');$('arrivalCard').classList.remove('hidden');$('resultSummary').textContent=destinationPoint.name.split(',').slice(0,2).join(',');$('resultList').innerHTML='<div class="route-placeholder"><div class="route-spinner">⏳</div><strong>Sto cercando le corse disponibili…</strong><span>Bus Facile userà il motore di trasporto pubblico lombardo per confrontare bus, treni e coincidenze.</span></div>';drawDestination();status('Destinazione trovata. Il motore TPL è pronto per essere collegato.')}catch(e){status(e.message==='destinazione'?'Non trovo la destinazione. Prova con città e via.':'Errore durante la ricerca. Riprova.')}finally{$('searchBtn').disabled=false}};
+function drawDestination(){if(!map||!destinationPoint)return;L.marker([destinationPoint.lat,destinationPoint.lon]).addTo(map).bindPopup('Destinazione');map.fitBounds(L.latLngBounds([[pos.lat,pos.lon],[destinationPoint.lat,destinationPoint.lon]]).pad(.2))}
+$('arrivalNotify').onchange=()=>{if($('arrivalNotify').checked){if(!finalStop){$('arrivalStatus').textContent='Attivata: appena il percorso fornirà la fermata finale, Bus Facile inizierà a controllare la posizione.';return}startArrivalWatch()}else{stopArrivalWatch();$('arrivalStatus').textContent='Avviso disattivato.'}};
+$('voiceTest').onclick=()=>{if('speechSynthesis'in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance('Attenzione. Stai arrivando alla tua fermata.');u.lang='it-IT';u.rate=.95;speechSynthesis.speak(u)}else alert('La sintesi vocale non è disponibile su questo dispositivo.')};
+function startArrivalWatch(){if(!navigator.geolocation||!finalStop)return;if(watchId)return;alertDone=false;watchId=navigator.geolocation.watchPosition(p=>{const d=distance(p.coords.latitude,p.coords.longitude,finalStop.lat,finalStop.lon);$('arrivalStatus').textContent='Distanza dalla fermata finale: '+Math.round(d)+' m';if(d<=300&&!alertDone){alertDone=true;if('vibrate'in navigator)navigator.vibrate([300,150,300]);if('Notification'in window&&Notification.permission==='granted')new Notification('Bus Facile',{body:'Tra poco arriva la tua fermata.'});if('speechSynthesis'in window){const u=new SpeechSynthesisUtterance('Attenzione. Tra poco arriva la tua fermata.');u.lang='it-IT';u.rate=.95;speechSynthesis.speak(u)}}},()=>{},{enableHighAccuracy:true,maximumAge:10000,timeout:10000});if('Notification'in window&&Notification.permission==='default')Notification.requestPermission()}
+function stopArrivalWatch(){if(watchId!==null)navigator.geolocation.clearWatch(watchId);watchId=null}
+function distance(a,b,c,d){const R=6371000,r=x=>x*Math.PI/180,x=r(c-a),y=r(d-b),h=Math.sin(x/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(y/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
 </script>
 </body>
-</html>
