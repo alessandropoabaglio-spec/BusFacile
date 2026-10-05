@@ -50,7 +50,7 @@ jobs:
           for line in lines:
               if "geolocationEnabled" in line:
                   indent = line[:len(line)-len(line.lstrip())]
-                  out.append(indent + "settings.setGeolocationEnabled(true)")
+                  out.append(indent + "webView.settings.setGeolocationEnabled(true)")
                   changed += 1
               else:
                   out.append(line)
