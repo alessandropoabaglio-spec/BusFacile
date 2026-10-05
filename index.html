@@ -107,21 +107,39 @@ $('searchBtn').onclick=async()=>{
  status(planned?'Cerco partenza, destinazione e preparo il viaggio programmato…':'Cerco destinazione e preparo la ricerca del trasporto pubblico…');
  $('searchBtn').disabled=true;
  try{
-   originPoint=planned?await geocode($('plannedOrigin').value.trim()):{...pos,name:'Posizione GPS'};
-   destinationPoint=await geocode(destination);
+   const plannedOrigin=$('plannedOrigin').value.trim();
+   let originError=false,destinationError=false;
+   if(planned){
+     try{originPoint=await geocode(plannedOrigin)}catch(e){originError=true;originPoint={name:plannedOrigin}}
+   }else{
+     originPoint={...pos,name:'Posizione GPS'};
+   }
+   try{destinationPoint=await geocode(destination)}catch(e){destinationError=true;destinationPoint={name:destination}}
    const when=document.querySelector('input[name="when"]:checked')?.value||'depart';
    const date=$('travelDate').value, time=$('travelTime').value;
    $('resultsCard').classList.remove('hidden');$('arrivalCard').classList.remove('hidden');
-   $('resultSummary').textContent=originPoint.name.split(',').slice(0,2).join(',')+' → '+destinationPoint.name.split(',').slice(0,2).join(',');
+   const originLabel=(originPoint.name||plannedOrigin).split(',').slice(0,2).join(',');
+   const destinationLabel=(destinationPoint.name||destination).split(',').slice(0,2).join(',');
+   $('resultSummary').textContent=originLabel+' → '+destinationLabel;
    const constraint=planned?(when==='arrive'?'Arrivare entro '+time:'Partire alle '+time):'Partire adesso';
-   $('resultList').innerHTML='<div class="route-placeholder"><div class="route-spinner">🚌</div><strong>'+constraint+'</strong><span>Partenza: '+originPoint.name.split(',').slice(0,2).join(', ')+'<br>Destinazione: '+destinationPoint.name.split(',').slice(0,2).join(', ')+'</span><div class="route-actions"><button class="btn primary" id="googleRouteBtn">🗺️ Apri percorso in Google Maps</button></div></div>';
+   $('resultList').innerHTML='<div class="route-placeholder"><div class="route-spinner">🚌</div><strong>'+constraint+'</strong><span>Partenza: '+originLabel+'<br>Destinazione: '+destinationLabel+'</span><div class="route-actions"><button class="btn primary" id="googleRouteBtn">🗺️ Apri percorso in Google Maps</button></div></div>';
    $('googleRouteBtn').onclick=()=>openGoogleTransit();
-   status(planned?(when==='arrive'?'Vincolo “Arrivare entro” impostato alle '+time+'.':'Vincolo “Partire alle” impostato alle '+time+'.'):'Destinazione trovata. Percorso dalla posizione GPS.');
- }catch(e){status(e.message==='destinazione'?'Non trovo la destinazione. Prova con città e via.':'Non trovo il punto di partenza. Prova con città e via.')}finally{$('searchBtn').disabled=false}
+   if(originError||destinationError){
+     status('Non riesco a geocodificare con precisione il punto, ma puoi comunque aprire il percorso in Google Maps.');
+   }else{
+     status(planned?(when==='arrive'?'Vincolo “Arrivare entro” impostato alle '+time+'.':'Vincolo “Partire alle” impostato alle '+time+'.'):'Destinazione trovata. Percorso dalla posizione GPS.');
+   }
+ }catch(e){status('Errore durante la ricerca. Riprova.')}finally{$('searchBtn').disabled=false}
 };
 function openGoogleTransit(){
- if(!originPoint||!destinationPoint)return;
- const url='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(originPoint.lat+','+originPoint.lon)+'&destination='+encodeURIComponent(destinationPoint.lat+','+destinationPoint.lon)+'&travelmode=transit&transit_mode=bus';
+ const origin=originPoint?.lat!=null&&originPoint?.lon!=null
+   ?originPoint.lat+','+originPoint.lon
+   :$('plannedOrigin').value.trim();
+ const destination=destinationPoint?.lat!=null&&destinationPoint?.lon!=null
+   ?destinationPoint.lat+','+destinationPoint.lon
+   :$('destination').value.trim();
+ if(!origin||!destination)return;
+ const url='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(origin)+'&destination='+encodeURIComponent(destination)+'&travelmode=transit&transit_mode=bus';
  window.open(url,'_blank');
 }
 $('arrivalNotify').onchange=()=>{if($('arrivalNotify').checked){if(!finalStop){$('arrivalStatus').textContent='Attivata: appena il percorso fornirà la fermata finale, Bus Facile inizierà a controllare la posizione.';return}startArrivalWatch()}else{stopArrivalWatch();$('arrivalStatus').textContent='Avviso disattivato.'}};
