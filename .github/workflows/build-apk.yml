@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/build-apk.yml'
       - 'BusFacileAndroid-progetto-con-compilazione-GitHub.zip'
+      - 'index.html'
 
 permissions:
   contents: read
@@ -39,27 +40,18 @@ jobs:
           MAIN="$(find "$GITHUB_WORKSPACE/android-project" -type f -name MainActivity.kt -print -quit)"
           test -n "$MAIN"
           echo "MainActivity: $MAIN"
-          grep -n "geolocationEnabled" "$MAIN" || true
           python3 - "$MAIN" <<'PY'
           import pathlib, sys
           p = pathlib.Path(sys.argv[1])
           s = p.read_text()
-          lines = s.splitlines()
-          out = []
-          changed = 0
-          for line in lines:
-              if "geolocationEnabled" in line:
-                  indent = line[:len(line)-len(line.lstrip())]
-                  out.append(indent + "webView.settings.setGeolocationEnabled(true)")
-                  changed += 1
-              else:
-                  out.append(line)
-          if changed != 1:
-              raise SystemExit(f"Correzioni geolocation effettuate: {changed}")
-          p.write_text("\n".join(out) + "\n")
+          old = "geolocationEnabled = true"
+          new = "webView.settings.setGeolocationEnabled(true)"
+          count = s.count(old)
+          if count != 1:
+              raise SystemExit(f"Correzioni geolocation attese: 1, trovate: {count}")
+          p.write_text(s.replace(old, new, 1))
           PY
-          echo "Dopo la correzione:"
-          grep -ni "geolocation" "$MAIN" || true
+          grep -ni "setGeolocationEnabled" "$MAIN"
 
       - name: Prepara Gradle
         uses: gradle/actions/setup-gradle@v4
