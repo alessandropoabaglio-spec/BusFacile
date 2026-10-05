@@ -40,14 +40,13 @@ jobs:
           echo "MainActivity: $MAIN"
           grep -n "geolocationEnabled" "$MAIN" || true
           python3 - "$MAIN" <<'PY'
-          import pathlib, sys
+          import pathlib, re, sys
           p = pathlib.Path(sys.argv[1])
           s = p.read_text()
-          old = "geolocationEnabled = true"
-          new = "settings.setGeolocationEnabled(true)"
-          if old not in s:
-              raise SystemExit("La riga geolocationEnabled = true non è presente in MainActivity.kt")
-          p.write_text(s.replace(old, new))
+          s2, n = re.subn(r'^([ \t]*)geolocationEnabled\s*=\s*true\s*$', r'\1settings.setGeolocationEnabled(true)', s, flags=re.MULTILINE)
+          if n != 1:
+              raise SystemExit(f"Attesa 1 riga geolocationEnabled, trovate {n}")
+          p.write_text(s2)
           PY
           grep -n "geolocation" "$MAIN"
 
