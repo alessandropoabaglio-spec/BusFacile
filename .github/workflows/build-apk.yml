@@ -39,15 +39,8 @@ jobs:
           test -n "$MAIN"
           echo "MainActivity: $MAIN"
           grep -n "geolocationEnabled" "$MAIN" || true
-          python3 - "$MAIN" <<'PY'
-          import pathlib, re, sys
-          p = pathlib.Path(sys.argv[1])
-          s = p.read_text()
-          s2, n = re.subn(r'^([ \t]*)geolocationEnabled\s*=\s*true\s*$', r'\1settings.setGeolocationEnabled(true)', s, flags=re.MULTILINE)
-          if n != 1:
-              raise SystemExit(f"Attesa 1 riga geolocationEnabled, trovate {n}")
-          p.write_text(s2)
-          PY
+          sed -i 's/geolocationEnabled[[:space:]]*=[[:space:]]*true/settings.setGeolocationEnabled(true)/' "$MAIN"
+          echo "Dopo la correzione:"
           grep -n "geolocation" "$MAIN"
 
       - name: Prepara Gradle
