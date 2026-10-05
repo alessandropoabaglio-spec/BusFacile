@@ -8,7 +8,7 @@
 <style>
 :root{color-scheme:light;--bg:#eef8ff;--panel:#ffffff;--panel2:#f5fbff;--text:#123047;--muted:#60798c;--blue:#168bd0;--blue2:#36b7f2;--green:#20a86b;--line:#cfe4f2;--shadow:0 14px 34px rgba(35,105,145,.13)}
 *{box-sizing:border-box}
-body{margin:0;background:linear-gradient(180deg,#f4fbff 0%,#e8f5fc 52%,#f7fcff 100%);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text);min-height:100vh}
+body{margin:0;background:radial-gradient(circle at 100% 0%,#d9f2ff 0,transparent 32%),linear-gradient(180deg,#f4fbff 0%,#e8f5fc 52%,#f7fcff 100%);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text);min-height:100vh}
 main{max-width:680px;margin:auto;padding:18px 15px 38px}
 .brand{display:flex;align-items:center;gap:12px;margin:7px 0 21px}
 .logo{width:54px;height:54px;border-radius:18px;background:linear-gradient(145deg,#75d8ff,#168bd0);display:grid;place-items:center;font-size:28px;box-shadow:0 8px 24px #2386c944}
@@ -35,7 +35,7 @@ input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px #75d4ff20
 .secondary{background:#f0f8fd;color:#18506f;border:1px solid #b9d7e7}
 .btn:disabled{opacity:.55}
 .status{color:var(--muted);font-size:13px;line-height:1.5;margin-top:11px;display:flex;gap:8px;align-items:flex-start}
-.status:before{content:"ⓘ";color:var(--blue);font-weight:800}
+.status:before{content:"ⓘ";color:var(--blue);font-weight:800}\n.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}\n.mode{border:1px solid #c7dce9;background:#f7fcff;border-radius:17px;padding:15px 12px;text-align:left;color:var(--text);cursor:pointer;transition:.15s;min-height:118px}\n.mode span{display:block;font-size:22px;margin-bottom:8px}.mode strong{display:block;font-size:14px;margin-bottom:5px}.mode small{display:block;color:var(--muted);font-size:11px;line-height:1.4}.mode.active{border-color:#58bafa;background:linear-gradient(145deg,#e8f8ff,#d7f1ff);box-shadow:0 7px 20px #38a8ed1c}\n.plan-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.choice-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.choice{display:flex;align-items:center;gap:8px;padding:12px;border:1px solid #c7dce9;border-radius:13px;background:#f8fcff;font-size:13px;font-weight:700;cursor:pointer}.choice input{width:auto;padding:0;box-shadow:none}\n@media(max-width:400px){main{padding:14px 12px 30px}.brand h1{font-size:23px}.top-tag{font-size:10px;padding:5px 7px}.hero{padding:17px 15px}.hero h2{font-size:21px}.stop-actions{grid-template-columns:1fr}.mode-grid,.plan-fields,.choice-row{grid-template-columns:1fr}}
 .position{display:flex;gap:11px;align-items:center;background:#f7fcff;border:1px solid #c9dfeb;padding:13px;border-radius:15px}
 .dot{width:11px;height:11px;border-radius:50%;background:var(--green);box-shadow:0 0 0 5px #83e4b61a;flex:none}
 .small{font-size:12px;color:var(--muted);line-height:1.55}
@@ -71,8 +71,27 @@ a:not(.btn){color:var(--blue)}
     <label class="label" for="destination">🎯 Dove vuoi andare? <span class="muted">(facoltativo)</span></label>
     <input id="destination" autocomplete="off" placeholder="Es. centro di Abbiategrasso">
   </div>
-  <button class="btn primary" id="searchBtn">Cerca autobus per la destinazione →</button>
-  <div class="status" id="status" role="status">Consenti il GPS quando richiesto. Il sito deve essere aperto tramite HTTPS.</div>
+  <div id="instantActions">
+  <button class="btn primary" id="searchBtn">Cerca collegamenti per la destinazione →</button>
+</div>
+<div id="planActions" class="hidden">
+  <div class="field">
+    <label class="label">Quando vuoi viaggiare?</label>
+    <div class="plan-fields">
+      <input id="travelDate" type="date" aria-label="Data del viaggio">
+      <input id="travelTime" type="time" aria-label="Ora del viaggio" value="08:00">
+    </div>
+  </div>
+  <div class="field">
+    <label class="label">Preferisci...</label>
+    <div class="choice-row">
+      <label class="choice"><input type="radio" name="when" value="depart" checked> Partire alle</label>
+      <label class="choice"><input type="radio" name="when" value="arrive"> Arrivare entro</label>
+    </div>
+  </div>
+  <button class="btn primary" id="planBtn">📅 Cerca il viaggio programmato →</button>
+</div>
+  <div class="status" id="status" role="status">Il GPS serve per trovare la fermata più vicina. Per un viaggio programmato puoi scegliere data e ora.</div>
 </section>
 
 <section class="card hidden" id="stopsCard">
@@ -84,8 +103,8 @@ a:not(.btn){color:var(--blue)}
 <section class="card hidden" id="tripCard">
   <div class="section-head"><div class="section-icon">🧭</div><h2>Il tuo viaggio</h2></div>
   <p class="small" id="tripText"></p>
-  <a class="btn primary" id="googleTransit" target="_blank" rel="noopener">🚌 Vedi percorso e orari su Google Maps</a>
-  <p class="small" style="margin-bottom:0">Google Maps può mostrare alternative e orari disponibili per la destinazione scelta. Controlla sempre il risultato prima di partire.</p>
+  <a class="btn primary" id="googleTransit" target="_blank" rel="noopener">🚌 Vedi percorso e orari</a>
+  <p class="small" style="margin-bottom:0">La ricerca considera i collegamenti di trasporto pubblico disponibili, non solo un singolo abbonamento. Controlla sempre il risultato prima di partire.</p>
 </section>
 
 <section class="card">
@@ -141,6 +160,39 @@ function findStops(){
 }
 function distance(a,b,c,d){const R=6371000,rad=x=>x*Math.PI/180;const x=rad(c-a),y=rad(d-b);const h=Math.sin(x/2)**2+Math.cos(rad(a))*Math.cos(rad(c))*Math.sin(y/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
 $('gpsBtn').addEventListener('click',findStops);
+
+$('nowMode').addEventListener('click',()=>{
+ mode='now'; $('nowMode').classList.add('active'); $('planMode').classList.remove('active');
+ $('instantActions').classList.remove('hidden'); $('planActions').classList.add('hidden');
+ status('Modalità viaggio adesso: troviamo le fermate vicine e i collegamenti disponibili.');
+});
+$('planMode').addEventListener('click',()=>{
+ mode='plan'; $('planMode').classList.add('active'); $('nowMode').classList.remove('active');
+ $('instantActions').classList.add('hidden'); $('planActions').classList.remove('hidden');
+ status('Modalità programma viaggio: scegli data, ora e destinazione.');
+});
+function buildTransitUrl(destination,date,time,when){
+ const [y,m,d]=date.split('-').map(Number),[hh,mm]=time.split(':').map(Number);
+ const dt=new Date(y,m-1,d,hh,mm,0);
+ const seconds=Math.floor(dt.getTime()/1000);
+ const params=new URLSearchParams({api:'1',origin:`${pos.lat},${pos.lon}`,destination,travelmode:'transit'});
+ params.set(when==='arrive'?'arrival_time':'departure_time',String(seconds));
+ return 'https://www.google.com/maps/dir/?'+params.toString();
+}
+$('planBtn').addEventListener('click',()=>{
+ if(!pos){status('Prima premi “Trova fermate vicine” e autorizza il GPS.');return}
+ const d=$('destination').value.trim();
+ if(!d){status('Inserisci prima una destinazione, ad esempio una città o una via.');$('destination').focus();return}
+ const date=$('travelDate').value,time=$('travelTime').value;
+ if(!date||!time){status('Scegli data e ora del viaggio.');return}
+ const when=document.querySelector('input[name="when"]:checked').value;
+ $('googleTransit').href=buildTransitUrl(d,date,time,when);
+ const whenText=when==='arrive'?'arrivare entro':'partire alle';
+ $('tripText').textContent=`Viaggio programmato per ${date.split('-').reverse().join('/')} alle ${time}, con obiettivo di ${whenText} ${time}, da ${pos.lat.toFixed(5)}, ${pos.lon.toFixed(5)} verso ${d}. La ricerca usa il trasporto pubblico disponibile.`;
+ $('tripCard').classList.remove('hidden');
+ $('tripCard').scrollIntoView({behavior:'smooth',block:'start'});
+});
+
 $('searchBtn').addEventListener('click',()=>{
  if(!pos){status('Prima premi “Trova fermate vicine” e autorizza il GPS.');return}
  const d=$('destination').value.trim();
