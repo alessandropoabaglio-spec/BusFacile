@@ -71,9 +71,10 @@ jobs:
               "import android.webkit.WebViewClient",
           ]
           lines = s.splitlines()
-          if "import android.webkit.WebViewClient" not in s:
+          missing = [imp for imp in imports if imp not in s]
+          if missing:
               pkg = next(i for i, line in enumerate(lines) if line.startswith("package "))
-              lines[pkg+1:pkg+1] = imports
+              lines[pkg+1:pkg+1] = missing
               s = "\n".join(lines) + ("\n" if s.endswith("\n") else "")
           if "BUS_FACILE_MAPS_CLIENT_START" not in s:
               anchor = "webView.settings.setGeolocationEnabled(true)"
