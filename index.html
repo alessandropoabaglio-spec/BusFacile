@@ -115,14 +115,7 @@ function setOriginMode(mode){
 }
 document.querySelectorAll('input[name="originMode"]').forEach(r=>r.onchange=()=>setOriginMode(r.value));
 $('plannedGpsBtn').onclick=()=>{if(!navigator.geolocation){status('Questo dispositivo non supporta il GPS.');return}status('Rilevo la posizione attuale…');navigator.geolocation.getCurrentPosition(p=>{pos={lat:p.coords.latitude,lon:p.coords.longitude};originPoint={...pos,name:'Posizione GPS'};$('plannedGpsText').textContent='Posizione GPS rilevata';$('plannedGpsCoords').textContent=pos.lat.toFixed(5)+', '+pos.lon.toFixed(5);status('Posizione GPS acquisita come partenza programmata.')},e=>status(e.code===1?'Permesso GPS negato. Abilita la posizione nel browser.':'Non riesco a rilevare la posizione. Riprova.'),{enableHighAccuracy:true,timeout:15000,maximumAge:30000})};
-function openGoogleMapsApp(webUrl){
-  const isAndroid=/Android/i.test(navigator.userAgent);
-  if(isAndroid){
-    const u=new URL(webUrl);
-    const intent='intent://'+u.host+u.pathname+u.search+'#Intent;scheme=https;package=com.google.android.apps.maps;end';
-    window.location.href=intent;
-  }else{ window.open(webUrl,'_blank'); }
-}
+function openGoogleMapsApp(webUrl){ window.location.href=webUrl; }
 $('mapOriginBtn').onclick=()=>{const q=$('destination').value.trim()||'Italia';const url='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);openGoogleMapsApp(url);status('Apro l’app Google Maps per scegliere la partenza.')};
 async function geocode(q){const r=await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=it&q='+encodeURIComponent(q),{headers:{Accept:'application/json'}});if(!r.ok)throw new Error('geocoding');const a=await r.json();if(!a.length)throw new Error('destinazione');return{lat:Number(a[0].lat),lon:Number(a[0].lon),name:a[0].display_name}}
 $('searchBtn').onclick=async()=>{
