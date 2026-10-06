@@ -108,10 +108,34 @@ jobs:
               }
 
               private fun openBusFacileExternalUrl(uri: Uri): Boolean {
+                  // Percorso proprietario usato dall'APK: evita che il browser intercetti
+                  // l'URL prima che possiamo consegnarlo all'app Google Maps.
+                  if (uri.scheme == "flashmybusmaps") {
+                      val target = uri.getQueryParameter("url")
+                      if (target.isNullOrBlank()) return true
+                      val mapsIntent = Intent(Intent.ACTION_VIEW, Uri.parse(target)).apply {
+                          setPackage("com.google.android.apps.maps")
+                      }
+                      return try {
+                          startActivity(mapsIntent)
+                          true
+                      } catch (_: Exception) {
+                          // Se Maps non è disponibile, usa il comportamento web di fallback.
+                          try {
+                              startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(target)))
+                              true
+                          } catch (_: Exception) {
+                              true
+                          }
+                      }
+                  }
+
+                  // Mantiene compatibilità con eventuali URL Maps generati da versioni precedenti.
                   val isGoogleMaps = uri.scheme == "https" &&
                       (uri.host == "www.google.com" || uri.host == "google.com") &&
                       (uri.path?.startsWith("/maps") == true)
                   if (!isGoogleMaps) return false
+
                   val intent = Intent(Intent.ACTION_VIEW, uri).apply {
                       setPackage("com.google.android.apps.maps")
                   }
@@ -123,14 +147,12 @@ jobs:
                           startActivity(Intent(Intent.ACTION_VIEW, uri))
                           true
                       } catch (_: Exception) {
-                          false
+                          true
                       }
                   }
               }
           }
           // BUS_FACILE_MAPS_CLIENT_END'''
-              s = s.replace(anchor, anchor + block, 1)
-              p.write_text(s)
           PY
           grep -n "BUS_FACILE_MAPS_CLIENT" "$MAIN"
 
