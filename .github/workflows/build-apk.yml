@@ -175,12 +175,17 @@ jobs:
           p = pathlib.Path(sys.argv[1])
           s = p.read_text()
 
-          imp = "import android.webkit.JavascriptInterface"
-          if imp not in s:
-              lines = s.splitlines()
-              pkg = next(i for i, line in enumerate(lines) if line.startswith("package "))
-              lines.insert(pkg + 1, imp)
-              s = "\n".join(lines) + ("\n" if s.endswith("\n") else "")
+          imports = [
+              "import android.webkit.JavascriptInterface",
+              "import android.speech.tts.TextToSpeech",
+              "import java.util.Locale",
+          ]
+          lines = s.splitlines()
+          pkg = next(i for i, line in enumerate(lines) if line.startswith("package "))
+          for imp in reversed(imports):
+              if imp not in s:
+                  lines.insert(pkg + 1, imp)
+          s = "\n".join(lines) + ("\n" if s.endswith("\n") else "")
 
           marker_start = "// FLASHMYBUS_NATIVE_MAPS_START"
           marker_end = "// FLASHMYBUS_NATIVE_MAPS_END"
@@ -195,6 +200,47 @@ jobs:
           block = r'''
           // FLASHMYBUS_NATIVE_MAPS_START
           webView.addJavascriptInterface(object {
+              private var flashTts: TextToSpeech? = null
+              private var flashTtsReady = false
+              private var flashTtsPending: String? = null
+
+              init {
+                  flashTts = TextToSpeech(this@MainActivity) { result ->
+                      runOnUiThread {
+                          flashTtsReady = result == TextToSpeech.SUCCESS
+                          if (flashTtsReady) {
+                              flashTts?.language = Locale.ITALIAN
+                              flashTts?.setSpeechRate(0.95f)
+                              flashTtsPending?.let { pending ->
+                                  flashTts?.speak(pending, TextToSpeech.QUEUE_FLUSH, null, "flashmybus")
+                                  flashTtsPending = null
+                              }
+                          }
+                      }
+                  }
+              }
+
+              @JavascriptInterface
+              fun speak(text: String) {
+                  runOnUiThread {
+                      if (text.isBlank()) return@runOnUiThread
+                      if (!flashTtsReady) {
+                          flashTtsPending = text
+                          return@runOnUiThread
+                      }
+                      flashTts?.stop()
+                      flashTts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "flashmybus")
+                  }
+              }
+
+              @JavascriptInterface
+              fun stopSpeech() {
+                  runOnUiThread { flashTts?.stop() }
+              }
+
+              @JavascriptInterface
+              fun ttsAvailable(): Boolean = flashTtsReady
+
               @JavascriptInterface
               fun openGoogleMaps(url: String) {
                   val target = Uri.parse(url)
@@ -254,6 +300,7 @@ jobs:
           s=re.sub(r'\n\s*// FLASHMYBUS_NATIVE_MAPS_START.*?// FLASHMYBUS_NATIVE_MAPS_END','',s,flags=re.S)
           s=re.sub(r'\n\s*// FLASHMYBUS_NATIVE_NOTIFICATIONS_START.*?// FLASHMYBUS_NATIVE_NOTIFICATIONS_END','',s,flags=re.S)
           s=re.sub(r'\n\s*// FLASHMYBUS_NATIVE_BRIDGE_START.*?// FLASHMYBUS_NATIVE_BRIDGE_END','',s,flags=re.S)
+          s=re.sub(r'\n\s*// FLASHMYBUS_NATIVE_TTS_START.*?// FLASHMYBUS_NATIVE_TTS_END','',s,flags=re.S)
           anchor='webView.settings.setGeolocationEnabled(true)'
           if anchor not in s: raise SystemExit('Ancora WebView non trovata')
           block=r'''
