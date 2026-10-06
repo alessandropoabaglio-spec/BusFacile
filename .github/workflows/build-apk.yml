@@ -233,100 +233,83 @@ jobs:
           python3 - "$MANIFEST" <<'PY'
           from pathlib import Path
           import sys
-          p=Path(sys.argv[1])
-          s=p.read_text()
+          p=Path(sys.argv[1]); s=p.read_text()
           perm='    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />'
           if 'android.permission.POST_NOTIFICATIONS' not in s:
               pos=s.find('<application')
-              if pos < 0: raise SystemExit('AndroidManifest: tag application non trovato')
+              if pos < 0: raise SystemExit('AndroidManifest: application non trovato')
               s=s[:pos]+perm+'\n    '+s[pos:]
               p.write_text(s)
           PY
           python3 - "$MAIN" <<'PY'
           from pathlib import Path
           import re, sys
-          p=Path(sys.argv[1])
-          s=p.read_text()
-          if 'android.webkit.JavascriptInterface' not in s:
+          p=Path(sys.argv[1]); s=p.read_text()
+          if 'import android.webkit.JavascriptInterface' not in s:
               lines=s.splitlines()
               pkg=next(i for i,line in enumerate(lines) if line.startswith('package '))
               lines.insert(pkg+1,'import android.webkit.JavascriptInterface')
               s='\n'.join(lines)+('\n' if s.endswith('\n') else '')
-          start='// FLASHMYBUS_NATIVE_NOTIFICATIONS_START'
-          end='// FLASHMYBUS_NATIVE_NOTIFICATIONS_END'
-          s=re.sub(r'\n\s*'+re.escape(start)+r'.*?'+re.escape(end),'',s,flags=re.S)
+          # Elimina i vecchi ponti Maps/notifiche e ne crea uno solo.
+          s=re.sub(r'\n\s*// FLASHMYBUS_NATIVE_MAPS_START.*?// FLASHMYBUS_NATIVE_MAPS_END','',s,flags=re.S)
+          s=re.sub(r'\n\s*// FLASHMYBUS_NATIVE_NOTIFICATIONS_START.*?// FLASHMYBUS_NATIVE_NOTIFICATIONS_END','',s,flags=re.S)
+          s=re.sub(r'\n\s*// FLASHMYBUS_NATIVE_BRIDGE_START.*?// FLASHMYBUS_NATIVE_BRIDGE_END','',s,flags=re.S)
           anchor='webView.settings.setGeolocationEnabled(true)'
-          if anchor not in s:
-              raise SystemExit('Ancora WebView non trovata per notifiche native')
+          if anchor not in s: raise SystemExit('Ancora WebView non trovata')
           block=r'''
-          // FLASHMYBUS_NATIVE_NOTIFICATIONS_START
+          // FLASHMYBUS_NATIVE_BRIDGE_START
           fun ensureFlashMyBusNotificationChannel() {
               if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                  val manager = getSystemService(android.app.NotificationManager::class.java)
-                  manager.createNotificationChannel(
-                      android.app.NotificationChannel(
-                          "flashmybus_alerts",
-                          "Avvisi FlashMyBus",
-                          android.app.NotificationManager.IMPORTANCE_HIGH
-                      )
+                  getSystemService(android.app.NotificationManager::class.java).createNotificationChannel(
+                      android.app.NotificationChannel("flashmybus_alerts","Avvisi FlashMyBus",android.app.NotificationManager.IMPORTANCE_HIGH)
                   )
               }
           }
-
           webView.addJavascriptInterface(object {
+              @JavascriptInterface
+              fun openGoogleMaps(url: String) {
+                  val target=Uri.parse(url)
+                  val intent=Intent(Intent.ACTION_VIEW,target).apply { setPackage("com.google.android.apps.maps") }
+                  runOnUiThread {
+                      try { startActivity(intent) }
+                      catch (_: Exception) { try { startActivity(Intent(Intent.ACTION_VIEW,target)) } catch (_: Exception) {} }
+                  }
+              }
               @JavascriptInterface
               fun notificationsAvailable(): Boolean {
                   return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
                       getSystemService(android.app.NotificationManager::class.java).areNotificationsEnabled() &&
-                          (android.os.Build.VERSION.SDK_INT < 33 ||
-                           checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) ==
-                           android.content.pm.PackageManager.PERMISSION_GRANTED)
+                      (android.os.Build.VERSION.SDK_INT < 33 || checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)==android.content.pm.PackageManager.PERMISSION_GRANTED)
                   } else true
               }
-
               @JavascriptInterface
               fun requestNotifications() {
                   ensureFlashMyBusNotificationChannel()
-                  if (android.os.Build.VERSION.SDK_INT >= 33 &&
-                      checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) !=
-                      android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                      requestPermissions(
-                          arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
-                          9042
+                  if (android.os.Build.VERSION.SDK_INT >= 33 && checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)!=android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                      requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),9042)
+                  }
+              }
+              @JavascriptInterface
+              fun showNotification(title:String, body:String) {
+                  runOnUiThread {
+                      ensureFlashMyBusNotificationChannel()
+                      if (android.os.Build.VERSION.SDK_INT >= 33 && checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)!=android.content.pm.PackageManager.PERMISSION_GRANTED) return@runOnUiThread
+                      val builder=if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
+                          android.app.Notification.Builder(this@MainActivity,"flashmybus_alerts")
+                      else android.app.Notification.Builder(this@MainActivity)
+                      getSystemService(android.app.NotificationManager::class.java).notify(
+                          (System.currentTimeMillis()%100000).toInt(),
+                          builder.setSmallIcon(android.R.drawable.ic_dialog_info).setContentTitle(title).setContentText(body).setAutoCancel(true).build()
                       )
                   }
               }
-
-              @JavascriptInterface
-              fun showNotification(title: String, body: String) {
-                  runOnUiThread {
-                      ensureFlashMyBusNotificationChannel()
-                      if (android.os.Build.VERSION.SDK_INT >= 33 &&
-                          checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) !=
-                          android.content.pm.PackageManager.PERMISSION_GRANTED) return@runOnUiThread
-
-                      val builder = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                          android.app.Notification.Builder(this@MainActivity, "flashmybus_alerts")
-                      } else {
-                          android.app.Notification.Builder(this@MainActivity)
-                      }
-                      val notification = builder
-                          .setSmallIcon(android.R.drawable.ic_dialog_info)
-                          .setContentTitle(title)
-                          .setContentText(body)
-                          .setAutoCancel(true)
-                          .build()
-                      getSystemService(android.app.NotificationManager::class.java)
-                          .notify((System.currentTimeMillis() % 100000).toInt(), notification)
-                  }
-              }
-          }, "FlashMyBusAndroid")
-          // FLASHMYBUS_NATIVE_NOTIFICATIONS_END
+          },"FlashMyBusAndroid")
+          // FLASHMYBUS_NATIVE_BRIDGE_END
           '''
           s=s.replace(anchor,anchor+'\n'+block,1)
           p.write_text(s)
           PY
-          grep -n -E "POST_NOTIFICATIONS|FLASHMYBUS_NATIVE_NOTIFICATIONS|requestNotifications|showNotification" "$MAIN" "$MANIFEST"
+          grep -n -E "FLASHMYBUS_NATIVE_BRIDGE|openGoogleMaps|requestNotifications|showNotification|POST_NOTIFICATIONS" "$MAIN" "$MANIFEST"
 
       - name: Prepara Gradle
         uses: gradle/actions/setup-gradle@v4
