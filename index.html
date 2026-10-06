@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#eaf6ff">
-<title>Bus Facile</title>
+<title>FlashMyBus</title>
 <style>
 :root{color-scheme:light;--bg:#eef8ff;--panel:#ffffff;--panel2:#f5fbff;--text:#123047;--muted:#60798c;--blue:#168bd0;--blue2:#36b7f2;--green:#20a86b;--line:#cfe4f2;--shadow:0 14px 34px rgba(35,105,145,.13)}
 *{box-sizing:border-box}
@@ -69,11 +69,11 @@ a:not(.btn){color:var(--blue)}
 @media(min-width:500px){.choice-row{grid-template-columns:1fr 1fr 1fr}}
 </style></style>
 </head>
-<!-- Bus Facile redesigned trip planner -->
+<!-- FlashMyBus redesigned trip planner -->
 <body>
 <main>
-<header class="brand"><div class="logo">🚌</div><div><h1>BUS FACILE</h1><p>Il modo più semplice per arrivare dove vuoi.</p></div><div class="top-tag">● GPS</div></header>
-<section class="hero"><div class="eyebrow">Trasporto pubblico intelligente</div><h2>Dimmi dove vuoi andare. Al resto pensiamo noi.</h2><p>Solo autobus: Bus Facile cercherà il collegamento in bus più conveniente e gli orari più vicini.</p></section>
+<header class="brand"><div class="logo">🚌</div><div><h1>FLASHMYBUS</h1><p>Il modo più semplice per arrivare dove vuoi.</p></div><div class="top-tag">● GPS</div></header>
+<section class="hero"><div class="eyebrow">Trasporto pubblico intelligente</div><h2>Dimmi dove vuoi andare. Al resto pensiamo noi.</h2><p>Solo autobus: FlashMyBus cercherà il collegamento in bus più conveniente e gli orari più vicini.</p></section>
 <section class="card"><div class="section-head"><div class="section-icon">🧭</div><div><h2>Come vuoi viaggiare?</h2><div class="small">Puoi partire subito oppure programmare il viaggio.</div></div></div>
 <div class="mode-grid"><button class="mode active" id="nowMode"><span>⚡</span><strong>Viaggio adesso</strong><small>Trova la soluzione migliore in partenza ora</small></button><button class="mode" id="planMode"><span>📅</span><strong>Programma viaggio</strong><small>Scegli giorno e ora per domani o un'altra data</small></button></div></section>
 <section class="card"><div class="section-head"><div class="section-icon">📍</div><h2>Il tuo viaggio</h2></div>
@@ -94,8 +94,8 @@ a:not(.btn){color:var(--blue)}
 <button class="btn primary" id="searchBtn">🔎 Trova il percorso migliore</button><div class="status" id="status">Per un viaggio immediato usiamo il GPS. Per un viaggio programmato puoi indicare una partenza diversa.</div></section>
 <section class="card hidden" id="resultsCard"><div class="section-head"><div class="section-icon">⭐</div><div><h2>Soluzione migliore</h2><div class="small" id="resultSummary"></div></div></div><div id="resultList"></div><div class="notice">Per i viaggi programmati la partenza viene usata come punto scelto da te, non come posizione GPS. Il vincolo “Arrivare entro” viene mantenuto nella richiesta del viaggio; il collegamento Google Maps viene usato come fallback.</div></section>
 <section class="card hidden" id="arrivalCard"><div class="section-head"><div class="section-icon">🔔</div><div><h2>Avviso di arrivo</h2><div class="small">Ti avvisiamo prima dell'ultima fermata.</div></div></div><label class="notify-toggle"><input type="checkbox" id="arrivalNotify"><span></span><b>Avvisami quando sto per arrivare</b></label><div class="small" id="arrivalStatus">L'avviso si attiverà quando il percorso avrà identificato la fermata finale.</div><button class="btn secondary" id="voiceTest" style="margin-top:10px">🔊 Prova voce</button></section>
-<section class="card"><div class="section-head"><div class="section-icon">🛡️</div><div><h2>Come funziona</h2></div></div><p class="small" style="margin:0">Bus Facile non usa il tuo abbonamento come filtro del percorso. L'obiettivo è confrontare il trasporto pubblico disponibile nella zona e proporti la soluzione più rapida, con meno cambi o con meno attesa.</p></section>
-<footer>BUS FACILE • Strumento indipendente, non ufficiale</footer>
+<section class="card"><div class="section-head"><div class="section-icon">🛡️</div><div><h2>Come funziona</h2></div></div><p class="small" style="margin:0">FlashMyBus non usa il tuo abbonamento come filtro del percorso. L'obiettivo è confrontare il trasporto pubblico disponibile nella zona e proporti la soluzione più rapida, con meno cambi o con meno attesa.</p></section>
+<footer>FLASHMYBUS • Strumento indipendente, non ufficiale</footer>
 </main>
 <script>
 let pos=null,originPoint=null,destinationPoint=null,finalStop=null,watchId=null,alertDone=false;
@@ -173,9 +173,9 @@ function openGoogleTransit(){
  const url='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(origin)+'&destination='+encodeURIComponent(destination)+'&travelmode=transit&transit_mode=bus';
  openGoogleMapsApp(url);
 }
-$('arrivalNotify').onchange=()=>{if($('arrivalNotify').checked){if(!finalStop){$('arrivalStatus').textContent='Attivata: appena il percorso fornirà la fermata finale, Bus Facile inizierà a controllare la posizione.';return}startArrivalWatch()}else{stopArrivalWatch();$('arrivalStatus').textContent='Avviso disattivato.'}};
+$('arrivalNotify').onchange=()=>{if($('arrivalNotify').checked){if(!finalStop){$('arrivalStatus').textContent='Attivata: appena il percorso fornirà la fermata finale, FlashMyBus inizierà a controllare la posizione.';return}startArrivalWatch()}else{stopArrivalWatch();$('arrivalStatus').textContent='Avviso disattivato.'}};
 $('voiceTest').onclick=()=>{if('speechSynthesis'in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance('Attenzione. Stai arrivando alla tua fermata.');u.lang='it-IT';u.rate=.95;speechSynthesis.speak(u)}else alert('La sintesi vocale non è disponibile su questo dispositivo.')};
-function startArrivalWatch(){if(!navigator.geolocation||!finalStop)return;if(watchId)return;alertDone=false;watchId=navigator.geolocation.watchPosition(p=>{const d=distance(p.coords.latitude,p.coords.longitude,finalStop.lat,finalStop.lon);$('arrivalStatus').textContent='Distanza dalla fermata finale: '+Math.round(d)+' m';if(d<=300&&!alertDone){alertDone=true;if('vibrate'in navigator)navigator.vibrate([300,150,300]);if('Notification'in window&&Notification.permission==='granted')new Notification('Bus Facile',{body:'Tra poco arriva la tua fermata.'});if('speechSynthesis'in window){const u=new SpeechSynthesisUtterance('Attenzione. Tra poco arriva la tua fermata.');u.lang='it-IT';u.rate=.95;speechSynthesis.speak(u)}}},()=>{},{enableHighAccuracy:true,maximumAge:10000,timeout:10000});if('Notification'in window&&Notification.permission==='default')Notification.requestPermission()}
+function startArrivalWatch(){if(!navigator.geolocation||!finalStop)return;if(watchId)return;alertDone=false;watchId=navigator.geolocation.watchPosition(p=>{const d=distance(p.coords.latitude,p.coords.longitude,finalStop.lat,finalStop.lon);$('arrivalStatus').textContent='Distanza dalla fermata finale: '+Math.round(d)+' m';if(d<=300&&!alertDone){alertDone=true;if('vibrate'in navigator)navigator.vibrate([300,150,300]);if('Notification'in window&&Notification.permission==='granted')new Notification('FlashMyBus',{body:'Tra poco arriva la tua fermata.'});if('speechSynthesis'in window){const u=new SpeechSynthesisUtterance('Attenzione. Tra poco arriva la tua fermata.');u.lang='it-IT';u.rate=.95;speechSynthesis.speak(u)}}},()=>{},{enableHighAccuracy:true,maximumAge:10000,timeout:10000});if('Notification'in window&&Notification.permission==='default')Notification.requestPermission()}
 function stopArrivalWatch(){if(watchId!==null)navigator.geolocation.clearWatch(watchId);watchId=null}
 function distance(a,b,c,d){const R=6371000,r=x=>x*Math.PI/180,x=r(c-a),y=r(d-b),h=Math.sin(x/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(y/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
 </script>
