@@ -229,23 +229,7 @@ jobs:
 
           # Inserisci il client subito dopo l'ultima chiamata loadUrl(...), così
           # qualunque WebViewClient impostato dal progetto originale viene superato.
-          matches = list(re.finditer(r'(?m)^\s*webView\.loadUrl\([^\n]*\)\s*
-
-      - name: Prepara Gradle
-        uses: gradle/actions/setup-gradle@v4
-
-      - name: Compila APK
-        run: |
-          cd "$(dirname "$(find "$GITHUB_WORKSPACE/android-project" -type f \( -name settings.gradle -o -name settings.gradle.kts \) -print -quit)")"
-          gradle assembleDebug -Pkotlin.jvm.target.validation.mode=warning
-
-      - name: Salva APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: BusFacile-APK
-          path: android-project/**/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
-, s))
+          matches = list(re.finditer(r'(?m)^\\s*webView\\.loadUrl\\([^\\n]*\\)\\s*$', s))
           if not matches:
               raise SystemExit("Non trovo webView.loadUrl(...) in MainActivity.kt")
           m = matches[-1]
