@@ -165,6 +165,96 @@ jobs:
           PY
           grep -n "BUS_FACILE_MAPS_CLIENT" "$MAIN"
 
+          # Riassegna il WebViewClient dopo l'ultima inizializzazione della WebView.
+          # Questo evita che il progetto Android originale lo sovrascriva dopo il nostro blocco.
+          python3 - "$MAIN" <<'PY'
+          import pathlib, re, sys
+          p = pathlib.Path(sys.argv[1])
+          s = p.read_text()
+
+          client = r'''
+          // BUS_FACILE_MAPS_CLIENT_FINAL_START
+          webView.webViewClient = object : WebViewClient() {
+              override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest): Boolean {
+                  return openFlashMyBusExternalUrl(request.url)
+              }
+
+              @Suppress("DEPRECATION")
+              override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+                  return if (url == null) false else openFlashMyBusExternalUrl(Uri.parse(url))
+              }
+
+              private fun openFlashMyBusExternalUrl(uri: Uri): Boolean {
+                  val target = if (uri.scheme == "flashmybusmaps") {
+                      uri.getQueryParameter("url")
+                  } else if (
+                      uri.scheme == "https" &&
+                      (uri.host == "www.google.com" || uri.host == "google.com") &&
+                      (uri.path?.startsWith("/maps") == true)
+                  ) {
+                      uri.toString()
+                  } else {
+                      return false
+                  }
+
+                  if (target.isNullOrBlank()) return true
+
+                  val mapsIntent = Intent(Intent.ACTION_VIEW, Uri.parse(target)).apply {
+                      setPackage("com.google.android.apps.maps")
+                  }
+
+                  return try {
+                      startActivity(mapsIntent)
+                      true
+                  } catch (_: Exception) {
+                      try {
+                          startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(target)))
+                          true
+                      } catch (_: Exception) {
+                          true
+                      }
+                  }
+              }
+          }
+          // BUS_FACILE_MAPS_CLIENT_FINAL_END
+          '''
+
+          # Rimuovi un'eventuale copia precedente del blocco finale.
+          s = re.sub(
+              r'\n\s*// BUS_FACILE_MAPS_CLIENT_FINAL_START.*?// BUS_FACILE_MAPS_CLIENT_FINAL_END',
+              '',
+              s,
+              flags=re.S
+          )
+
+          # Inserisci il client subito dopo l'ultima chiamata loadUrl(...), così
+          # qualunque WebViewClient impostato dal progetto originale viene superato.
+          matches = list(re.finditer(r'(?m)^\s*webView\.loadUrl\([^\n]*\)\s*
+
+      - name: Prepara Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Compila APK
+        run: |
+          cd "$(dirname "$(find "$GITHUB_WORKSPACE/android-project" -type f \( -name settings.gradle -o -name settings.gradle.kts \) -print -quit)")"
+          gradle assembleDebug -Pkotlin.jvm.target.validation.mode=warning
+
+      - name: Salva APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BusFacile-APK
+          path: android-project/**/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+, s))
+          if not matches:
+              raise SystemExit("Non trovo webView.loadUrl(...) in MainActivity.kt")
+          m = matches[-1]
+          s = s[:m.end()] + "\n" + client + s[m.end():]
+          p.write_text(s)
+          print("WebViewClient Maps finale inserito dopo loadUrl")
+          PY
+          grep -n -E "BUS_FACILE_MAPS_CLIENT_(START|FINAL_START|FINAL_END)|webView\.loadUrl|webView\.webViewClient" "$MAIN"
+
 
       - name: Prepara Gradle
         uses: gradle/actions/setup-gradle@v4
