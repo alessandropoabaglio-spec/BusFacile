@@ -50,6 +50,9 @@ jobs:
           grep -q "FLASHMYBUS" "$WEB_ASSET"
           ! grep -qi "Orari STAV" "$WEB_ASSET"
           ! grep -qi "Sito Movibus" "$WEB_ASSET"
+          grep -q 'window.FlashMyBusAndroid' "$WEB_ASSET"
+          grep -q 'openGoogleMaps(webUrl)' "$WEB_ASSET"
+          echo "OK: asset APK contiene il ponte nativo Google Maps"
 
 
       - name: Correggi geolocalizzazione WebView
