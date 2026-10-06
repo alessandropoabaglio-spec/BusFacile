@@ -260,7 +260,7 @@ jobs:
               raise SystemExit('Ancora WebView non trovata per notifiche native')
           block=r'''
           // FLASHMYBUS_NATIVE_NOTIFICATIONS_START
-          private fun ensureFlashMyBusNotificationChannel() {
+          fun ensureFlashMyBusNotificationChannel() {
               if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                   val manager = getSystemService(android.app.NotificationManager::class.java)
                   manager.createNotificationChannel(
