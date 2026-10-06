@@ -165,79 +165,59 @@ jobs:
           PY
           grep -n "BUS_FACILE_MAPS_CLIENT" "$MAIN"
 
-          # Riassegna il WebViewClient dopo l'ultima inizializzazione della WebView.
-          # Questo evita che il progetto Android originale lo sovrascriva dopo il nostro blocco.
+          # Ponte nativo diretto JavaScript -> Android -> Google Maps.
+          # Non dipende da shouldOverrideUrlLoading, quindi evita ERR_UNKNOWN_URL_SCHEME.
           python3 - "$MAIN" <<'PY'
-          import pathlib, re, sys
+          import pathlib, sys
           p = pathlib.Path(sys.argv[1])
           s = p.read_text()
 
-          client = r'''
-          // BUS_FACILE_MAPS_CLIENT_FINAL_START
-          webView.webViewClient = object : WebViewClient() {
-              override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest): Boolean {
-                  return openFlashMyBusExternalUrl(request.url)
-              }
+          imp = "import android.webkit.JavascriptInterface"
+          if imp not in s:
+              lines = s.splitlines()
+              pkg = next(i for i, line in enumerate(lines) if line.startswith("package "))
+              lines.insert(pkg + 1, imp)
+              s = "\n".join(lines) + ("\n" if s.endswith("\n") else "")
 
-              @Suppress("DEPRECATION")
-              override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
-                  return if (url == null) false else openFlashMyBusExternalUrl(Uri.parse(url))
-              }
+          marker_start = "// FLASHMYBUS_NATIVE_MAPS_START"
+          marker_end = "// FLASHMYBUS_NATIVE_MAPS_END"
+          if marker_start in s and marker_end in s:
+              import re
+              s = re.sub(r'\n\s*// FLASHMYBUS_NATIVE_MAPS_START.*?// FLASHMYBUS_NATIVE_MAPS_END', '', s, flags=re.S)
 
-              private fun openFlashMyBusExternalUrl(uri: Uri): Boolean {
-                  val target = if (uri.scheme == "flashmybusmaps") {
-                      uri.getQueryParameter("url")
-                  } else if (
-                      uri.scheme == "https" &&
-                      (uri.host == "www.google.com" || uri.host == "google.com") &&
-                      (uri.path?.startsWith("/maps") == true)
-                  ) {
-                      uri.toString()
-                  } else {
-                      return false
-                  }
+          anchor = "webView.settings.setGeolocationEnabled(true)"
+          if anchor not in s:
+              raise SystemExit("Ancora WebView non trovata per il ponte Maps")
 
-                  if (target.isNullOrBlank()) return true
-
-                  val mapsIntent = Intent(Intent.ACTION_VIEW, Uri.parse(target)).apply {
+          block = r'''
+          // FLASHMYBUS_NATIVE_MAPS_START
+          webView.addJavascriptInterface(object {
+              @JavascriptInterface
+              fun openGoogleMaps(url: String) {
+                  val target = Uri.parse(url)
+                  val mapsIntent = Intent(Intent.ACTION_VIEW, target).apply {
                       setPackage("com.google.android.apps.maps")
                   }
-
-                  return try {
-                      startActivity(mapsIntent)
-                      true
-                  } catch (_: Exception) {
+                  runOnUiThread {
                       try {
-                          startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(target)))
-                          true
+                          startActivity(mapsIntent)
                       } catch (_: Exception) {
-                          true
+                          try {
+                              startActivity(Intent(Intent.ACTION_VIEW, target))
+                          } catch (_: Exception) {
+                          }
                       }
                   }
               }
-          }
-          // BUS_FACILE_MAPS_CLIENT_FINAL_END
+          }, "FlashMyBusAndroid")
+          // FLASHMYBUS_NATIVE_MAPS_END
           '''
 
-          # Rimuovi un'eventuale copia precedente del blocco finale.
-          s = re.sub(
-              r'\n\s*// BUS_FACILE_MAPS_CLIENT_FINAL_START.*?// BUS_FACILE_MAPS_CLIENT_FINAL_END',
-              '',
-              s,
-              flags=re.S
-          )
-
-          # Inserisci il client subito dopo l'ultima chiamata loadUrl(...), così
-          # qualunque WebViewClient impostato dal progetto originale viene superato.
-          matches = list(re.finditer(r'(?m)^\\s*webView\\.loadUrl\\([^\\n]*\\)\\s*$', s))
-          if not matches:
-              raise SystemExit("Non trovo webView.loadUrl(...) in MainActivity.kt")
-          m = matches[-1]
-          s = s[:m.end()] + "\n" + client + s[m.end():]
+          s = s.replace(anchor, anchor + "\n" + block, 1)
           p.write_text(s)
-          print("WebViewClient Maps finale inserito dopo loadUrl")
           PY
-          grep -n -E "BUS_FACILE_MAPS_CLIENT_(START|FINAL_START|FINAL_END)|webView\.loadUrl|webView\.webViewClient" "$MAIN"
+          grep -n -E "FLASHMYBUS_NATIVE_MAPS|JavascriptInterface|addJavascriptInterface" "$MAIN"
+
 
 
       - name: Prepara Gradle
