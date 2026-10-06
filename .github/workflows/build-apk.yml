@@ -34,6 +34,17 @@ jobs:
           unzip -q BusFacileAndroid-progetto-con-compilazione-GitHub.zip -d android-project
           find android-project -type f | head -100
           test -n "$(find android-project -type f \( -name settings.gradle -o -name settings.gradle.kts \) -print -quit)"
+      
+      - name: Sincronizza interfaccia web nell'APK
+        run: |
+          WEB_ASSET="$(find "$GITHUB_WORKSPACE/android-project" -type f -path '*/app/src/main/assets/index.html' -print -quit)"
+          test -n "$WEB_ASSET"
+          cp "$GITHUB_WORKSPACE/index.html" "$WEB_ASSET"
+          echo "Asset APK aggiornato: $WEB_ASSET"
+          grep -q "BUS FACILE" "$WEB_ASSET"
+          ! grep -qi "Orari STAV" "$WEB_ASSET"
+          ! grep -qi "Sito Movibus" "$WEB_ASSET"
+
 
       - name: Correggi geolocalizzazione WebView
         run: |
