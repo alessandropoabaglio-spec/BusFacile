@@ -49,14 +49,12 @@ jobs:
               ("webView.settings.geolocationEnabled = true", "webView.settings.setGeolocationEnabled(true)"),
               ("geolocationEnabled = true", "webView.settings.setGeolocationEnabled(true)"),
           ]
-          applied = 0
           for old, new in replacements:
               if old in s:
                   s = s.replace(old, new, 1)
-                  applied += 1
                   break
-          if applied != 1:
-              raise SystemExit("Impossibile trovare la riga di geolocalizzazione da correggere")
+          if "setGeolocationEnabled(true)" not in s:
+              raise SystemExit("Impossibile configurare la geolocalizzazione WebView")
           p.write_text(s)
           PY
           grep -ni "setGeolocationEnabled" "$MAIN"
@@ -69,6 +67,7 @@ jobs:
               "import android.net.Uri",
               "import android.webkit.WebResourceRequest",
               "import android.webkit.WebViewClient",
+              "import android.webkit.WebView",
           ]
           lines = s.splitlines()
           missing = [imp for imp in imports if imp not in s]
