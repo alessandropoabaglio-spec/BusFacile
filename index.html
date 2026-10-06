@@ -68,7 +68,14 @@ a:not(.btn){color:var(--blue)}
 .choice-row{display:grid;grid-template-columns:1fr;gap:8px}.choice{display:flex;align-items:center;gap:8px;padding:12px;border:1px solid #c7dce9;border-radius:13px;background:#f8fcff;font-size:13px;font-weight:700;cursor:pointer}.choice input{width:auto;padding:0;box-shadow:none}
 @media(min-width:500px){.choice-row{grid-template-columns:1fr 1fr 1fr}}
 </style></style>
-</head>
+<style>
+.interest-card{background:linear-gradient(145deg,#f4fbff,#e9f8ff);border-color:#a9d8ee}
+.interest-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;color:#08784d;background:#e8f8f0;border:1px solid #9cdbc1;border-radius:999px;padding:5px 8px;margin-top:4px}
+.interest-grid{display:grid;grid-template-columns:1fr auto;gap:9px;align-items:end}.interest-grid .btn{width:auto;min-width:110px}
+.interest-status{margin-top:10px;padding:11px 12px;border-radius:12px;background:#f7fcff;border:1px solid #c7dce9;font-size:12px;line-height:1.5;color:#557286}
+.interest-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+@media(max-width:400px){.interest-grid{grid-template-columns:1fr}.interest-grid .btn{width:100%}}
+</style></head>
 <!-- FlashMyBus redesigned trip planner -->
 <body>
 <main>
@@ -94,7 +101,13 @@ a:not(.btn){color:var(--blue)}
 <button class="btn primary" id="searchBtn">🔎 Trova il percorso migliore</button><div class="status" id="status">Per un viaggio immediato usiamo il GPS. Per un viaggio programmato puoi indicare una partenza diversa.</div></section>
 <section class="card hidden" id="resultsCard"><div class="section-head"><div class="section-icon">⭐</div><div><h2>Soluzione migliore</h2><div class="small" id="resultSummary"></div></div></div><div id="resultList"></div><div class="notice">Per i viaggi programmati la partenza viene usata come punto scelto da te, non come posizione GPS. Il vincolo “Arrivare entro” viene mantenuto nella richiesta del viaggio; il collegamento Google Maps viene usato come fallback.</div></section>
 <section class="card hidden" id="arrivalCard"><div class="section-head"><div class="section-icon">🔔</div><div><h2>Avviso di arrivo</h2><div class="small">Ti avvisiamo prima dell'ultima fermata.</div></div></div><label class="notify-toggle"><input type="checkbox" id="arrivalNotify"><span></span><b>Avvisami quando sto per arrivare</b></label><div class="small" id="arrivalStatus">L'avviso si attiverà quando il percorso avrà identificato la fermata finale.</div><button class="btn secondary" id="voiceTest" style="margin-top:10px">🔊 Prova voce</button></section>
-<section class="card"><div class="section-head"><div class="section-icon">🛡️</div><div><h2>Come funziona</h2></div></div><p class="small" style="margin:0">FlashMyBus non usa il tuo abbonamento come filtro del percorso. L'obiettivo è confrontare il trasporto pubblico disponibile nella zona e proporti la soluzione più rapida, con meno cambi o con meno attesa.</p></section>
+<section class="card interest-card" id="interestCard">
+<div class="section-head"><div class="section-icon">⭐</div><div><h2>La mia linea di interesse</h2><div class="small">Segui la linea che usi più spesso e ricevi solo gli avvisi che ti riguardano.</div><div class="interest-badge" id="anonymousBadge">👤 Utente anonimo</div></div></div>
+<div class="field"><label class="label" for="interestLine">Linea abituale</label><div class="interest-grid"><input id="interestLine" autocomplete="off" placeholder="Es. Z646"><button class="btn primary" id="saveInterestBtn" type="button">⭐ Segui linea</button></div></div>
+<label class="notify-toggle"><input type="checkbox" id="interestNotify"><span></span><b>Avvisami dei ritardi della mia linea</b></label>
+<div class="interest-status" id="interestStatus">Nessuna linea seguita. Quando una corsa verrà identificata automaticamente, potremo proporre di seguirla con un solo tocco.</div>
+<div class="interest-actions"><button class="btn secondary" id="clearInterestBtn" type="button">Rimuovi linea</button><button class="btn secondary" id="requestNotifyBtn" type="button">🔔 Attiva notifiche</button></div>
+</section><section class="card"><div class="section-head"><div class="section-icon">🛡️</div><div><h2>Come funziona</h2></div></div><p class="small" style="margin:0">FlashMyBus non usa il tuo abbonamento come filtro del percorso. L'obiettivo è confrontare il trasporto pubblico disponibile nella zona e proporti la soluzione più rapida, con meno cambi o con meno attesa.</p></section>
 <footer>FLASHMYBUS • Strumento indipendente, non ufficiale</footer>
 </main>
 <script>
@@ -178,6 +191,15 @@ $('voiceTest').onclick=()=>{if('speechSynthesis'in window){speechSynthesis.cance
 function startArrivalWatch(){if(!navigator.geolocation||!finalStop)return;if(watchId)return;alertDone=false;watchId=navigator.geolocation.watchPosition(p=>{const d=distance(p.coords.latitude,p.coords.longitude,finalStop.lat,finalStop.lon);$('arrivalStatus').textContent='Distanza dalla fermata finale: '+Math.round(d)+' m';if(d<=300&&!alertDone){alertDone=true;if('vibrate'in navigator)navigator.vibrate([300,150,300]);if('Notification'in window&&Notification.permission==='granted')new Notification('FlashMyBus',{body:'Tra poco arriva la tua fermata.'});if('speechSynthesis'in window){const u=new SpeechSynthesisUtterance('Attenzione. Tra poco arriva la tua fermata.');u.lang='it-IT';u.rate=.95;speechSynthesis.speak(u)}}},()=>{},{enableHighAccuracy:true,maximumAge:10000,timeout:10000});if('Notification'in window&&Notification.permission==='default')Notification.requestPermission()}
 function stopArrivalWatch(){if(watchId!==null)navigator.geolocation.clearWatch(watchId);watchId=null}
 function distance(a,b,c,d){const R=6371000,r=x=>x*Math.PI/180,x=r(c-a),y=r(d-b),h=Math.sin(x/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(y/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
-</script>
-</body>
+<script>
+// --- LINEA DI INTERESSE / COMMUNITY (fase 1) ---
+function getAnonymousUserId(){const key='flashmybus_anonymous_user_id';let id=localStorage.getItem(key);if(!id){const n=(crypto&&crypto.getRandomValues)?crypto.getRandomValues(new Uint32Array(1))[0]:Math.floor(Math.random()*1e9);id='Utente '+String(n).slice(-3).padStart(3,'0');localStorage.setItem(key,id)}return id}
+function loadInterest(){const line=localStorage.getItem('flashmybus_interest_line')||'';const notify=localStorage.getItem('flashmybus_interest_notify')==='1';$('anonymousBadge').textContent='👤 '+getAnonymousUserId();$('interestLine').value=line;$('interestNotify').checked=notify;if(line)$('interestStatus').textContent='Stai seguendo la linea '+line+'. '+(notify?'Riceverai gli avvisi disponibili per questa linea.':'Gli avvisi sono disattivati.')}
+function saveInterest(){const line=$('interestLine').value.trim().toUpperCase();if(!line){$('interestStatus').textContent='Inserisci il numero della linea per seguirla.';return}localStorage.setItem('flashmybus_interest_line',line);localStorage.setItem('flashmybus_interest_notify',$('interestNotify').checked?'1':'0');$('interestStatus').textContent='Linea '+line+' seguita. Le segnalazioni future potranno essere filtrate su questa linea.'}
+$('saveInterestBtn').onclick=saveInterest;
+$('interestNotify').onchange=()=>{const line=localStorage.getItem('flashmybus_interest_line');if(!line&&$('interestNotify').checked){$('interestNotify').checked=false;$('interestStatus').textContent='Prima scegli la tua linea di interesse.';return}localStorage.setItem('flashmybus_interest_notify',$('interestNotify').checked?'1':'0');if(line)$('interestStatus').textContent='Linea '+line+' seguita. '+($('interestNotify').checked?'Avvisi ritardi attivati.':'Avvisi ritardi disattivati.')};
+$('clearInterestBtn').onclick=()=>{localStorage.removeItem('flashmybus_interest_line');localStorage.removeItem('flashmybus_interest_notify');$('interestLine').value='';$('interestNotify').checked=false;$('interestStatus').textContent='Nessuna linea seguita. Quando una corsa verrà identificata automaticamente, potremo proporre di seguirla con un solo tocco.'};
+$('requestNotifyBtn').onclick=async()=>{if(!('Notification'in window)){$('interestStatus').textContent='Le notifiche di sistema non sono disponibili su questo dispositivo.';return}const p=await Notification.requestPermission();$('interestStatus').textContent=p==='granted'?'Notifiche di sistema abilitate.':'Notifiche non abilitate.'};
+loadInterest();
+</script></body>
 <!-- APK build sync trigger: Android build copies this index.html into assets. -->
