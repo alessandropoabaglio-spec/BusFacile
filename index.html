@@ -116,9 +116,14 @@ function setOriginMode(mode){
 document.querySelectorAll('input[name="originMode"]').forEach(r=>r.onchange=()=>setOriginMode(r.value));
 $('plannedGpsBtn').onclick=()=>{if(!navigator.geolocation){status('Questo dispositivo non supporta il GPS.');return}status('Rilevo la posizione attuale…');navigator.geolocation.getCurrentPosition(p=>{pos={lat:p.coords.latitude,lon:p.coords.longitude};originPoint={...pos,name:'Posizione GPS'};$('plannedGpsText').textContent='Posizione GPS rilevata';$('plannedGpsCoords').textContent=pos.lat.toFixed(5)+', '+pos.lon.toFixed(5);status('Posizione GPS acquisita come partenza programmata.')},e=>status(e.code===1?'Permesso GPS negato. Abilita la posizione nel browser.':'Non riesco a rilevare la posizione. Riprova.'),{enableHighAccuracy:true,timeout:15000,maximumAge:30000})};
 function openGoogleMapsApp(webUrl){
-  // Nell'APK Android l'asset viene caricato da file://: usiamo uno schema
-  // proprietario che MainActivity intercetta e inoltra direttamente a Google Maps.
-  if(location.protocol==='file:'){
+  // Nell'APK Android il contenuto viene servito tramite WebViewAssetLoader
+  // (appassets.androidplatform.net), non tramite file://. In entrambi i casi
+  // passiamo da uno schema interno che MainActivity inoltra direttamente a Maps.
+  const isFlashMyBusAndroid =
+    location.protocol === 'file:' ||
+    location.hostname === 'appassets.androidplatform.net' ||
+    /;\s*wv\)/i.test(navigator.userAgent);
+  if(isFlashMyBusAndroid){
     window.location.href='flashmybusmaps://open?url='+encodeURIComponent(webUrl);
     return;
   }
