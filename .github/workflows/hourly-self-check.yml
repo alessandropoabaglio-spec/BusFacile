@@ -1,0 +1,45 @@
+name: Controllo automatico Bus Facile
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 * * * *"
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  check-and-fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Controlla Maps
+        run: |
+          grep -q 'BUS_FACILE_MAPS_CLIENT_START' .github/workflows/build-apk.yml
+          grep -q 'setPackage("com.google.android.apps.maps")' .github/workflows/build-apk.yml
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          start=s.find('function openGoogleMapsApp(')
+          if start >= 0:
+              end=s.find("\n$('mapOriginBtn')", start)
+              if end > start:
+                  s=s[:start]+'function openGoogleMapsApp(webUrl){ window.location.href=webUrl; }'+s[end:]
+          p.write_text(s)
+          PY
+
+      - name: Commit correzioni
+        run: |
+          git config user.name 'Bus Facile AutoFix'
+          git config user.email 'actions@github.com'
+          git add index.html
+          if ! git diff --cached --quiet; then git commit -m 'AutoFix Maps APK'; git push; fi
+
+      - name: Avvia build APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run build-apk.yml --ref main
