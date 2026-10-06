@@ -76,9 +76,10 @@ jobs:
           PY
           grep -ni "setGeolocationEnabled" "$MAIN"
           python3 - "$MAIN" <<'PY'
-          import pathlib, sys
+          import pathlib, re, sys
           p = pathlib.Path(sys.argv[1])
           s = p.read_text()
+
           imports = [
               "import android.content.Intent",
               "import android.net.Uri",
@@ -92,11 +93,21 @@ jobs:
               pkg = next(i for i, line in enumerate(lines) if line.startswith("package "))
               lines[pkg+1:pkg+1] = missing
               s = "\n".join(lines) + ("\n" if s.endswith("\n") else "")
-          if "BUS_FACILE_MAPS_CLIENT_START" not in s:
-              anchor = "webView.settings.setGeolocationEnabled(true)"
-              if anchor not in s:
-                  raise SystemExit("Non trovo l'ancora WebView per il client Google Maps")
-              block = '''\n          // BUS_FACILE_MAPS_CLIENT_START
+
+          # Elimina qualsiasi vecchio client Maps già presente e reinserisce sempre
+          # la versione corrente, così ogni build parte da uno stato deterministico.
+          s = re.sub(
+              r'\n\s*// BUS_FACILE_MAPS_CLIENT_START.*?// BUS_FACILE_MAPS_CLIENT_END',
+              '',
+              s,
+              flags=re.S
+          )
+
+          anchor = "webView.settings.setGeolocationEnabled(true)"
+          if anchor not in s:
+              raise SystemExit("Non trovo l'ancora WebView per il client Google Maps")
+
+          block = '''\n          // BUS_FACILE_MAPS_CLIENT_START
           webView.webViewClient = object : WebViewClient() {
               override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest): Boolean {
                   return openBusFacileExternalUrl(request.url)
@@ -108,8 +119,6 @@ jobs:
               }
 
               private fun openBusFacileExternalUrl(uri: Uri): Boolean {
-                  // Percorso proprietario usato dall'APK: evita che il browser intercetti
-                  // l'URL prima che possiamo consegnarlo all'app Google Maps.
                   if (uri.scheme == "flashmybusmaps") {
                       val target = uri.getQueryParameter("url")
                       if (target.isNullOrBlank()) return true
@@ -120,7 +129,6 @@ jobs:
                           startActivity(mapsIntent)
                           true
                       } catch (_: Exception) {
-                          // Se Maps non è disponibile, usa il comportamento web di fallback.
                           try {
                               startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(target)))
                               true
@@ -130,7 +138,6 @@ jobs:
                       }
                   }
 
-                  // Mantiene compatibilità con eventuali URL Maps generati da versioni precedenti.
                   val isGoogleMaps = uri.scheme == "https" &&
                       (uri.host == "www.google.com" || uri.host == "google.com") &&
                       (uri.path?.startsWith("/maps") == true)
@@ -153,6 +160,8 @@ jobs:
               }
           }
           // BUS_FACILE_MAPS_CLIENT_END'''
+          s = s.replace(anchor, anchor + block, 1)
+          p.write_text(s)
           PY
           grep -n "BUS_FACILE_MAPS_CLIENT" "$MAIN"
 
