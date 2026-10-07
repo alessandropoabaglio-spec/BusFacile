@@ -93,9 +93,9 @@ main{max-width:680px;margin:auto;padding:0 0 96px!important}
 <div class="section-head"><div class="section-icon">🎮</div><div><h2>La tua sfida</h2><div class="small">Piccoli giochi, punti e livelli da conquistare.</div></div></div>
 <div class="fun-level"><div class="fun-badge" id="funBadge">🌱</div><div style="flex:1"><strong id="funLevel">Passeggero curioso</strong><div class="small"><span id="funPoints">0</span> punti • prossimo livello a <span id="funNext">100</span></div><div class="xpbar"><span id="funXp"></span></div></div></div>
 <div class="game-grid" style="margin-top:11px">
-<button class="game-btn" type="button" id="riddleBtn">🧩<b>Indovinello del giorno</b><small>+10 punti</small></button>
-<button class="game-btn" type="button" id="quizBtn">⚡<b>Quiz lampo</b><small>3 domande • +5</small></button>
-<button class="game-btn" type="button" id="lineGameBtn">🚌<b>Indovina la linea</b><small>Un indizio • +15</small></button>
+<button class="game-btn" type="button" id="quizBtn">📚<b>Quiz per argomento</b><small>Storia • Matematica • Inglese • Scienze</small></button>
+<button class="game-btn" type="button" id="riddleBtn">🧩<b>Indovinello</b><small>+10 punti</small></button>
+<button class="game-btn" type="button" id="lineGameBtn">🚌<b>Indovina la linea</b><small>+15 punti</small></button>
 <button class="game-btn" type="button" id="dailyBtn">🎯<b>Sfida del giorno</b><small>+20 punti</small></button>
 </div>
 <div class="quiz-box hidden" id="gameBox"><strong id="gameTitle"></strong><div class="small" id="gameQuestion" style="margin-top:5px"></div><div class="quiz-options" id="gameOptions"></div><div class="quiz-result hidden" id="gameResult" aria-live="polite"></div></div>
@@ -247,9 +247,51 @@ const levels=[{p:0,n:'Passeggero curioso',b:'🌱',next:100},{p:100,n:'Apprendis
 let funPoints=Number(localStorage.getItem('flashmybus_fun_points')||0);
 function renderFun(){let i=levels.length-1;for(let j=0;j<levels.length;j++){if(funPoints<levels[j].next){i=j;break}}const l=levels[i],prev=l.p,span=Math.max(1,l.next-prev),pct=l.next===l.p?100:Math.min(100,Math.max(0,(funPoints-prev)/span*100));document.getElementById('funPoints').textContent=funPoints;document.getElementById('funLevel').textContent=l.n;document.getElementById('funBadge').textContent=l.b;document.getElementById('funNext').textContent=l.next;document.getElementById('funXp').style.width=pct+'%';document.getElementById('collect2').classList.toggle('locked',funPoints<300);document.getElementById('collect3').classList.toggle('locked',funPoints<600);document.getElementById('collect4').classList.toggle('locked',funPoints<2000)}
 function addFunPoints(n){funPoints+=n;localStorage.setItem('flashmybus_fun_points',String(funPoints));renderFun()}
-const games={riddle:{t:'Indovinello del giorno',q:'Quale città è famosa per il Duomo e si trova in Lombardia?',o:['Milano','Roma','Napoli'],a:0,p:10},quiz:{t:'Quiz lampo',q:'Quante ruote ha normalmente un autobus urbano?',o:['2','4','6'],a:1,p:5},line:{t:'Indovina la linea',q:'Indizio: una linea di autobus può collegare più fermate dello stesso territorio. Qual è il suo scopo?',o:['Trasportare passeggeri','Solo parcheggiare','Vendere biglietti online'],a:0,p:15},daily:{t:'Sfida del giorno',q:'Completa: fermata + autobus + destinazione = ?',o:['Viaggio','Videogioco','Semaforo'],a:0,p:20}};
+const games={riddle:{t:'Indovinello del giorno',q:'Quale città è famosa per il Duomo e si trova in Lombardia?',o:['Milano','Roma','Napoli'],a:0,p:10},line:{t:'Indovina la linea',q:'Indizio: una linea di autobus può collegare più fermate dello stesso territorio. Qual è il suo scopo?',o:['Trasportare passeggeri','Solo parcheggiare','Vendere biglietti online'],a:0,p:15},daily:{t:'Sfida del giorno',q:'Completa: fermata + autobus + destinazione = ?',o:['Viaggio','Videogioco','Semaforo'],a:0,p:20}};
+const quizBank={
+storia:[
+['In quale anno cadde l’Impero romano d’Occidente?',['476','395','410','527'],0],
+['Chi fu il primo imperatore romano?',['Augusto','Cesare','Nerone','Traiano'],0],
+['Dove nacque la civiltà egizia?',['Lungo il Nilo','Lungo il Tevere','In Grecia','In Gallia'],0],
+['Quale città fu sepolta dall’eruzione del Vesuvio del 79 d.C.?',['Pompei','Ravenna','Torino','Aosta'],0],
+['Chi guidò la spedizione dei Mille?',['Giuseppe Garibaldi','Camillo Cavour','Giuseppe Mazzini','Vittorio Emanuele II'],0]
+],
+matematica:[
+['Quanto fa 17 × 8?',['136','126','144','128'],0],
+['Qual è il risultato di 144 ÷ 12?',['12','10','14','16'],0],
+['Qual è la radice quadrata di 81?',['9','8','7','11'],0],
+['Se x + 7 = 19, quanto vale x?',['12','11','13','26'],0],
+['Qual è il 25% di 240?',['60','50','80','40'],0]
+],
+inglese:[
+['Qual è la traduzione corretta di “I am hungry”?',['Ho fame','Ho sete','Sono stanco','Sono felice'],0],
+['Qual è il passato di “go”?',['went','goed','gone','going'],0],
+['“Beautiful” significa:',['Bello/bella','Veloce','Rumoroso','Affamato'],0],
+['Completa: “She ___ to school every day.”',['goes','go','going','gone'],0],
+['Quale parola significa “finestra”?',['window','door','floor','roof'],0]
+],
+scienze:[
+['Qual è il simbolo chimico dell’ossigeno?',['O','Ox','Os','Og'],0],
+['Quale organo pompa il sangue?',['Cuore','Polmone','Fegato','Rene'],0],
+['Quanti pianeti ci sono nel Sistema Solare?',['8','7','9','10'],0],
+['A quale temperatura congela l’acqua a pressione atmosferica standard?',['0 °C','10 °C','-10 °C','100 °C'],0],
+['Quale gas è più abbondante nell’atmosfera terrestre?',['Azoto','Ossigeno','Anidride carbonica','Idrogeno'],0]
+],
+geografia:[
+['Qual è la capitale della Francia?',['Parigi','Madrid','Lione','Bruxelles'],0],
+['Qual è il fiume più lungo d’Italia?',['Po','Tevere','Arno','Adige'],0],
+['In quale continente si trova il Sahara?',['Africa','Asia','Europa','America'],0],
+['Qual è la capitale del Giappone?',['Tokyo','Kyoto','Osaka','Nara'],0],
+['Quale oceano bagna la costa occidentale dell’Italia?',['Mar Tirreno','Oceano Atlantico','Oceano Indiano','Oceano Pacifico'],0]
+]};
+const quizSeenKey='flashmybus_quiz_seen_v1',quizStatsKey='flashmybus_quiz_stats_v1';
+const quizStats=JSON.parse(localStorage.getItem(quizStatsKey)||'{}');
+function questionPool(subject){const base=quizBank[subject]||[];const out=[];for(let i=0;i<base.length;i++){out.push({id:subject+'-'+i,q:base[i][0],o:base[i][1],a:base[i][2],level:1})}return out}
+function buildQuizPool(subject){let pool=questionPool(subject);const target=subject==='matematica'?1000:Math.min(1000,pool.length);if(subject==='matematica'){const generated=[];for(let a=2;a<=100;a++)for(let b=2;b<=30;b++){const answer=a*b;generated.push({id:'m-'+a+'-'+b,q:'Quanto fa '+a+' × '+b+'?',o:[String(answer),String(answer+a),String(answer-b),String(answer+10)],a:0,level:Math.min(5,1+Math.floor((a+b)/30))});}pool=generated.slice(0,target)}return pool}
+function openQuizMenu(){const box=document.getElementById('gameBox'),title=document.getElementById('gameTitle'),q=document.getElementById('gameQuestion'),opts=document.getElementById('gameOptions'),res=document.getElementById('gameResult');box.classList.remove('hidden');title.textContent='Quiz per argomento';q.textContent='Scegli una materia. Le domande diventano più difficili man mano che sali di livello.';res.classList.add('hidden');opts.innerHTML='';Object.keys(quizBank).forEach(s=>{const b=document.createElement('button');b.type='button';b.className='quiz-option';b.textContent=s[0].toUpperCase()+s.slice(1);b.addEventListener('click',()=>startQuiz(s));opts.appendChild(b)})}
+function startQuiz(subject){const box=document.getElementById('gameBox'),title=document.getElementById('gameTitle'),q=document.getElementById('gameQuestion'),opts=document.getElementById('gameOptions'),res=document.getElementById('gameResult');const pool=buildQuizPool(subject);const seen=JSON.parse(localStorage.getItem(quizSeenKey)||'{}');const used=seen[subject]||[];let available=pool.filter(x=>!used.includes(x.id));if(!available.length){seen[subject]=[];available=pool}const level=Math.min(5,1+Math.floor((funPoints)/300));const candidates=available.filter(x=>x.level<=level);const g=candidates[Math.floor(Math.random()*Math.max(1,candidates.length))]||available[0];box.classList.remove('hidden');title.textContent=subject[0].toUpperCase()+subject.slice(1)+' • livello '+level;q.textContent=g.q;res.classList.add('hidden');opts.innerHTML='';const order=g.o.map((x,i)=>({x,i})).sort(()=>Math.random()-.5);order.forEach(v=>{const b=document.createElement('button');b.type='button';b.className='quiz-option';b.textContent=v.x;b.addEventListener('click',()=>{opts.querySelectorAll('button').forEach(x=>x.disabled=true);const ok=v.i===g.a;seen[subject]=[...(seen[subject]||[]),g.id];localStorage.setItem(quizSeenKey,JSON.stringify(seen));if(ok){const points=5+g.level*2;addFunPoints(points);res.textContent='🎉 Esatto! +'+points+' punti.'}else{res.textContent='🙂 Non questa volta. La risposta corretta era: '+g.o[g.a]+'.'}res.classList.remove('hidden')});opts.appendChild(b)})}
 function playGame(key){const g=games[key],box=document.getElementById('gameBox'),title=document.getElementById('gameTitle'),q=document.getElementById('gameQuestion'),opts=document.getElementById('gameOptions'),res=document.getElementById('gameResult');box.classList.remove('hidden');title.textContent=g.t;q.textContent=g.q;res.classList.add('hidden');opts.innerHTML='';g.o.forEach((x,i)=>{const b=document.createElement('button');b.type='button';b.className='quiz-option';b.textContent=x;b.addEventListener('click',()=>{opts.querySelectorAll('button').forEach(v=>v.disabled=true);if(i===g.a){addFunPoints(g.p);res.textContent='🎉 Esatto! +'+g.p+' punti.'}else{res.textContent='🙂 Non questa volta. Riprova domani.'}res.classList.remove('hidden')});opts.appendChild(b)})}
-document.getElementById('riddleBtn')?.addEventListener('click',()=>playGame('riddle'));document.getElementById('quizBtn')?.addEventListener('click',()=>playGame('quiz'));document.getElementById('lineGameBtn')?.addEventListener('click',()=>playGame('line'));document.getElementById('dailyBtn')?.addEventListener('click',()=>playGame('daily'));renderFun();
+document.getElementById('riddleBtn')?.addEventListener('click',()=>playGame('riddle'));document.getElementById('quizBtn')?.addEventListener('click',openQuizMenu);document.getElementById('lineGameBtn')?.addEventListener('click',()=>playGame('line'));document.getElementById('dailyBtn')?.addEventListener('click',()=>playGame('daily'));renderFun();
 const quickReport=(text)=>{const line=document.getElementById('quickDelayLine').value.trim().toUpperCase();const st=document.getElementById('quickDelayStatus');if(!line){st.textContent='Inserisci prima il numero della linea, ad esempio Z646.';st.classList.remove('hidden');document.getElementById('quickDelayLine').focus();return}const comment=document.getElementById('quickDelayComment').value.trim();st.textContent='Segnalazione registrata per la linea '+line+': '+text+(comment?' — '+comment:'')+'. Grazie!';st.classList.remove('hidden');document.getElementById('quickDelayComment').value='';};
 document.querySelectorAll('[data-quick-delay]').forEach(b=>b.addEventListener('click',()=>quickReport('Ritardo segnalato: circa '+b.dataset.quickDelay+' min')));
 document.getElementById('quickReportSkipped')?.addEventListener('click',()=>quickReport('Corsa probabilmente non effettuata'));
