@@ -75,12 +75,34 @@ a:not(.btn){color:var(--blue)}
 .interest-status{margin-top:10px;padding:11px 12px;border-radius:12px;background:#f7fcff;border:1px solid #c7dce9;font-size:12px;line-height:1.5;color:#557286}
 .interest-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 @media(max-width:400px){.interest-grid{grid-template-columns:1fr}.interest-grid .btn{width:100%}}
+
+.mural-visual{margin:0 0 14px;border-radius:24px;overflow:hidden;border:1px solid #b9dff2;box-shadow:var(--shadow);background:#dff4ff}.mural-visual svg{display:block;width:100%;height:auto}.mural-visual text{letter-spacing:.4px}
 </style></head>
 <!-- FlashMyBus redesigned trip planner: Bus predefinito -->
 <body>
 <main>
 <header class="brand"><div class="logo">🚌</div><div><h1>FLASHMYBUS</h1><p>Il modo più semplice per arrivare dove vuoi.</p></div><div class="top-tag">● GPS</div></header>
-<section class="hero"><div class="eyebrow">Trasporto pubblico intelligente</div><h2>Dimmi dove vuoi andare. Al resto pensiamo noi.</h2><p>Bus selezionato automaticamente. Puoi cambiare modalità di trasporto in qualsiasi momento.</p></section>
+<section class="mural-visual" aria-label="Illustrazione FlashMyBus"><svg viewBox="0 0 680 250" role="img" aria-hidden="true">
+<defs><linearGradient id="muralSky" x1="0" x2="1"><stop offset="0" stop-color="#bdeeff"/><stop offset="1" stop-color="#e9d8ff"/></linearGradient></defs>
+<rect width="680" height="250" rx="24" fill="url(#muralSky)"/>
+<path d="M0 185 Q100 125 205 180 T410 165 T680 155 V250 H0Z" fill="#7ec8d7" opacity=".5"/>
+<path d="M0 205 Q120 150 240 205 T470 190 T680 175 V250 H0Z" fill="#6a7bd8" opacity=".28"/>
+<g transform="translate(385 72)">
+<rect x="0" y="38" width="220" height="92" rx="18" fill="#168bd0"/>
+<rect x="15" y="53" width="72" height="37" rx="8" fill="#dff7ff"/><rect x="96" y="53" width="52" height="37" rx="8" fill="#dff7ff"/><rect x="157" y="53" width="48" height="37" rx="8" fill="#dff7ff"/>
+<circle cx="48" cy="137" r="18" fill="#173e55"/><circle cx="178" cy="137" r="18" fill="#173e55"/>
+<path d="M25 106 H195" stroke="#7de0ff" stroke-width="7" stroke-linecap="round"/>
+</g>
+<g transform="translate(115 70)">
+<circle cx="45" cy="31" r="22" fill="#f1b98b"/><path d="M25 29 Q43 0 68 22 L65 35 Q43 18 24 38Z" fill="#173e55"/>
+<path d="M31 53 Q48 43 66 56 L77 116 H17Z" fill="#ff6f61"/><path d="M36 61 L5 101 M61 61 L92 94" stroke="#173e55" stroke-width="10" stroke-linecap="round"/>
+<path d="M38 116 L20 156 M61 116 L78 156" stroke="#173e55" stroke-width="11" stroke-linecap="round"/>
+<path d="M22 18 Q8 35 25 48 M68 18 Q84 33 67 48" fill="none" stroke="#8d4de8" stroke-width="7" stroke-linecap="round"/>
+<path d="M13 7 Q46 -15 77 8" fill="none" stroke="#ffcf4a" stroke-width="7" stroke-linecap="round"/>
+</g>
+<text x="28" y="218" font-family="sans-serif" font-size="24" font-weight="900" fill="#173e55">FLASHMYBUS</text>
+<text x="28" y="241" font-family="sans-serif" font-size="12" font-weight="700" fill="#557286">ASPETTA IL BUS • VAI DOVE VUOI</text>
+</svg></section><section class="hero"><div class="eyebrow">Trasporto pubblico intelligente</div><h2>Dimmi dove vuoi andare. Al resto pensiamo noi.</h2><p>Bus selezionato automaticamente. Puoi cambiare modalità di trasporto in qualsiasi momento.</p></section>
 <section class="card"><div class="section-head"><div class="section-icon">🧭</div><div><h2>Come vuoi viaggiare?</h2><div class="small">Puoi partire subito oppure programmare il viaggio.</div></div></div>
 <div class="mode-grid"><button class="mode active" id="nowMode"><span>⚡</span><strong>Viaggio adesso</strong><small>Trova la soluzione migliore in partenza ora</small></button><button class="mode" id="planMode"><span>📅</span><strong>Programma viaggio</strong><small>Scegli giorno e ora per domani o un'altra data</small></button></div></section>
 <section class="card"><div class="section-head"><div class="section-icon">📍</div><h2>Il tuo viaggio</h2></div>
