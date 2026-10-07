@@ -43,7 +43,26 @@ main{max-width:680px;margin:auto;padding:0 0 96px!important}
 <section class="card hidden" id="arrivalCard"><div class="section-head"><div class="section-icon">🔔</div><div><h2>Avviso di arrivo</h2><div class="small">Ti avvisiamo prima dell'ultima fermata.</div></div></div><label class="notify-toggle"><input type="checkbox" id="arrivalNotify"><span></span><b>Avvisami quando sto per arrivare</b></label><div class="small" id="arrivalStatus">L'avviso si attiverà quando il percorso avrà identificato la fermata finale.</div><button class="btn secondary" id="voiceTest" style="margin-top:10px">🔊 Prova voce</button>
 <button class="btn secondary" id="resetDataBtn" type="button" style="margin-top:10px">🗑️ Azzera dati</button>
 <div class="small" style="margin-top:7px">Cancella impostazioni, linea seguita, segnalazioni e risultati del viaggio da questo dispositivo.</div></section>
-<section class="card interest-card" id="interestCard">
+<section class="card hidden" id="quickDelayCard">
+<div class="section-head"><div class="section-icon">🚌</div><div><h2>Segnala ritardo</h2><div class="small">Sei già sul bus? Indica la linea e segnala subito il ritardo.</div></div></div>
+<div class="field"><label class="label" for="quickDelayLine">Linea</label><input id="quickDelayLine" autocomplete="off" placeholder="Es. Z646"></div>
+<div class="label" style="margin-bottom:7px">Quanto è in ritardo?</div>
+<div class="delay-grid">
+<button class="delay-btn" type="button" data-quick-delay="5">+5 min</button>
+<button class="delay-btn" type="button" data-quick-delay="10">+10 min</button>
+<button class="delay-btn delay-hot" type="button" data-quick-delay="15">+15 min</button>
+<button class="delay-btn delay-hot" type="button" data-quick-delay="20">+20 min</button>
+<button class="delay-btn" type="button" data-quick-delay="25">+25 min</button>
+<button class="delay-btn delay-hot" type="button" data-quick-delay="30">+30 min</button>
+</div>
+<div class="delay-extra">
+<button class="delay-action" type="button" id="quickReportSkipped">🚫 Corsa saltata</button>
+<button class="delay-action" type="button" id="quickReportOnBoard">🧍 Sono a bordo</button>
+<button class="delay-action" type="button" id="quickReportPassed">🚌 Il bus è appena passato</button>
+</div>
+<div class="delay-comment"><input id="quickDelayComment" maxlength="120" placeholder="Commento facoltativo"></div>
+<div class="delay-status hidden" id="quickDelayStatus"></div>
+</section><section class="card interest-card" id="interestCard">
 <div class="section-head"><div class="section-icon">⭐</div><div><h2>La mia linea di interesse</h2><div class="small">Segui la linea che usi più spesso e ricevi solo gli avvisi che ti riguardano.</div><div class="interest-badge" id="anonymousBadge">👤 Utente anonimo</div></div></div>
 <div class="field"><label class="label" for="interestLine">Linea abituale</label><div class="interest-grid"><input id="interestLine" autocomplete="off" placeholder="Es. Z646"><button class="btn primary" id="saveInterestBtn" type="button">⭐ Segui linea</button></div></div>
 <label class="notify-toggle"><input type="checkbox" id="interestNotify"><span></span><b>Avvisami dei ritardi della mia linea</b></label>
@@ -206,7 +225,12 @@ function resetAppData(){
 }
 $('resetDataBtn').onclick=()=>{if(confirm('Vuoi davvero azzerare tutti i dati di FlashMyBus su questo dispositivo?'))resetAppData()};
 loadInterest();showDelayBoard();
-</script><script>document.addEventListener('DOMContentLoaded',()=>{const go=id=>{const e=document.getElementById(id);if(e)e.scrollIntoView({behavior:'smooth',block:'start'})};const activate=id=>{document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));document.getElementById(id)?.classList.add('active')};const safeGps=()=>{document.getElementById('gpsBtn')?.click();go('travelCard')};document.getElementById('menuNow')?.addEventListener('click',()=>{document.getElementById('nowMode')?.click();go('travelCard')});document.getElementById('menuPlan')?.addEventListener('click',()=>{document.getElementById('planMode')?.click();go('travelCard')});document.getElementById('menuDelay')?.addEventListener('click',()=>{const board=document.getElementById('delayBoard');if(board&&!board.classList.contains('hidden')){go('delayBoard')}else{go('interestCard')} });document.getElementById('navHome')?.addEventListener('click',()=>{window.scrollTo({top:0,behavior:'smooth'});activate('navHome')});document.getElementById('navStops')?.addEventListener('click',()=>{safeGps();activate('navStops')});document.getElementById('navLines')?.addEventListener('click',()=>{go('travelCard');activate('navLines')});document.getElementById('navFav')?.addEventListener('click',()=>{go('interestCard');activate('navFav')});document.getElementById('navMore')?.addEventListener('click',()=>{go('arrivalCard');activate('navMore')})});</script>
+</script><script>document.addEventListener('DOMContentLoaded',()=>{const go=id=>{const e=document.getElementById(id);if(e)e.scrollIntoView({behavior:'smooth',block:'start'})};const activate=id=>{document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));document.getElementById(id)?.classList.add('active')};const safeGps=()=>{document.getElementById('gpsBtn')?.click();go('travelCard')};document.getElementById('menuNow')?.addEventListener('click',()=>{document.getElementById('nowMode')?.click();go('travelCard')});document.getElementById('menuPlan')?.addEventListener('click',()=>{document.getElementById('planMode')?.click();go('travelCard')});document.getElementById('menuDelay')?.addEventListener('click',()=>{const card=document.getElementById('quickDelayCard');card?.classList.remove('hidden');go('quickDelayCard')});document.getElementById('navHome')?.addEventListener('click',()=>{window.scrollTo({top:0,behavior:'smooth'});activate('navHome')});document.getElementById('navStops')?.addEventListener('click',()=>{safeGps();activate('navStops')});document.getElementById('navLines')?.addEventListener('click',()=>{go('travelCard');activate('navLines')});document.getElementById('navFav')?.addEventListener('click',()=>{go('interestCard');activate('navFav')});document.getElementById('navMore')?.addEventListener('click',()=>{go('arrivalCard');activate('navMore')});
+const quickReport=(text)=>{const line=document.getElementById('quickDelayLine').value.trim().toUpperCase();const st=document.getElementById('quickDelayStatus');if(!line){st.textContent='Inserisci prima il numero della linea, ad esempio Z646.';st.classList.remove('hidden');document.getElementById('quickDelayLine').focus();return}const comment=document.getElementById('quickDelayComment').value.trim();st.textContent='Segnalazione registrata per la linea '+line+': '+text+(comment?' — '+comment:'')+'. Grazie!';st.classList.remove('hidden');document.getElementById('quickDelayComment').value='';};
+document.querySelectorAll('[data-quick-delay]').forEach(b=>b.addEventListener('click',()=>quickReport('Ritardo segnalato: circa '+b.dataset.quickDelay+' min')));
+document.getElementById('quickReportSkipped')?.addEventListener('click',()=>quickReport('Corsa probabilmente non effettuata'));
+document.getElementById('quickReportOnBoard')?.addEventListener('click',()=>quickReport('Sono a bordo'));
+document.getElementById('quickReportPassed')?.addEventListener('click',()=>quickReport('Il bus è appena passato'))});</script>
 
 </body>
 <!-- APK build sync trigger: Android build copies this index.html into assets. -->
