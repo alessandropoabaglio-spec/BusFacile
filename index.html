@@ -126,7 +126,7 @@ input:focus,select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px #20d9ff18
 .interest-badge{color:#09150f;background:#19d77a;border-color:#19d77a}
 footer{color:#68778b}
 a:not(.btn){color:#20cfff}
- .mural-reference{background:#090d14;min-height:0}.mural-reference img{display:block;width:100%;height:auto;aspect-ratio:1.4/1;object-fit:cover;border-radius:22px}.mural-reference{position:relative}.mural-reference img{visibility:hidden}.mural-reference:after{content:"";position:absolute;inset:0;background-image:url("assets/fmb-graffiti-1.b64");background-size:cover;background-position:center;border-radius:22px} .mural-reference:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.12));z-index:1;pointer-events:none}</style></head>
+ .mural-reference{background:#090d14;min-height:0}.mural-reference img{display:block;width:100%;height:auto;border-radius:22px;object-fit:cover}.mural-reference{position:relative}.mural-reference:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.08));z-index:1;pointer-events:none}</head>
 <!-- FlashMyBus redesigned trip planner: Bus predefinito -->
 <body>
 <main>
@@ -162,6 +162,7 @@ a:not(.btn){color:#20cfff}
 <footer>FLASHMYBUS • Strumento indipendente, non ufficiale</footer>
 </main>
 <script>
+fetch('assets/fmb-graffiti-x1.b64').then(r=>r.text()).then(b=>{const i=document.getElementById('graffitiArtwork'); if(i)i.src='data:image/jpeg;base64,'+b.trim()}).catch(()=>{});
 let pos=null,originPoint=null,destinationPoint=null,finalStop=null,watchId=null,alertDone=false;
 const $=id=>document.getElementById(id); function status(s){$('status').textContent=s}
 function initDate(){const d=new Date();d.setMinutes(d.getMinutes()+5);$('travelDate').value=d.toISOString().slice(0,10);$('travelTime').value=d.toTimeString().slice(0,5)} initDate();
