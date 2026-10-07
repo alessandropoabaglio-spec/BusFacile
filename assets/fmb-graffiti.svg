@@ -1,19 +1,61 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700" width="1800" height="1400">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1100" width="1800" height="2200">
 <defs>
-<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#087fca"/><stop offset=".48" stop-color="#20aee5"/><stop offset="1" stop-color="#07558c"/></linearGradient>
-<linearGradient id="bus" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffd400"/><stop offset="1" stop-color="#f39a00"/></linearGradient>
-<filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="8" stdDeviation="8" flood-opacity=".35"/></filter>
-<pattern id="dots" width="34" height="34" patternUnits="userSpaceOnUse"><circle cx="5" cy="6" r="2.5" fill="#fff" opacity=".16"/><circle cx="22" cy="22" r="1.8" fill="#071d38" opacity=".2"/></pattern>
+<linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#087fca"/><stop offset=".5" stop-color="#20aee5"/><stop offset="1" stop-color="#07558c"/></linearGradient>
+<linearGradient id="bus" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffd400"/><stop offset=".55" stop-color="#00a8ef"/><stop offset="1" stop-color="#0877b8"/></linearGradient>
+<linearGradient id="glass" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#8be7ff"/><stop offset="1" stop-color="#0c5d8d"/></linearGradient>
+<filter id="shadow"><feDropShadow dx="0" dy="12" stdDeviation="10" flood-opacity=".38"/></filter>
+<pattern id="dots" width="34" height="34" patternUnits="userSpaceOnUse"><circle cx="5" cy="6" r="2.5" fill="#fff" opacity=".18"/><circle cx="22" cy="22" r="1.8" fill="#071d38" opacity=".22"/></pattern>
 </defs>
-<rect width="900" height="700" fill="url(#bg)"/><rect width="900" height="700" fill="url(#dots)"/>
-<path d="M-30 120 Q150 20 315 110 T660 75 T930 150" fill="none" stroke="#f7d000" stroke-width="72" opacity=".9"/>
-<path d="M-20 545 Q170 420 330 520 T650 470 T930 535" fill="none" stroke="#13c36b" stroke-width="62" opacity=".85"/>
-<path d="M50 40 L180 190 M15 210 L220 20 M700 20 L850 180 M650 670 L880 500" stroke="#e83c91" stroke-width="22" opacity=".85"/>
-<path d="M35 380 C170 270 220 430 330 330 S540 270 610 360 S790 450 900 350" fill="none" stroke="#073b73" stroke-width="34" opacity=".8"/>
-<g fill="#fff" opacity=".9"><circle cx="120" cy="300" r="9"/><circle cx="155" cy="330" r="5"/><circle cx="765" cy="260" r="8"/><circle cx="805" cy="285" r="4"/></g>
-<g filter="url(#shadow)" font-family="Arial Black, Impact, sans-serif" font-weight="900"><text x="450" y="180" text-anchor="middle" font-size="116" fill="#fff" stroke="#071d38" stroke-width="14" paint-order="stroke">FLASH</text><text x="505" y="285" text-anchor="middle" font-size="126" fill="#ffd400" stroke="#071d38" stroke-width="15" paint-order="stroke">MyBus</text></g>
-<g transform="translate(95 330)" filter="url(#shadow)"><circle cx="155" cy="90" r="70" fill="#d6a07a"/><path d="M92 88 Q110 10 170 22 Q215 30 225 92 Q185 58 125 65Z" fill="#171b24"/><path d="M76 82 Q55 95 75 125 M233 82 Q255 95 235 125" fill="none" stroke="#ff3f9d" stroke-width="22" stroke-linecap="round"/><circle cx="75" cy="108" r="27" fill="#ff3f9d" stroke="#071d38" stroke-width="8"/><circle cx="235" cy="108" r="27" fill="#ff3f9d" stroke="#071d38" stroke-width="8"/><path d="M102 168 Q160 135 218 168 L270 355 L50 355Z" fill="#202b43"/><path d="M118 205 L64 345 M200 205 L250 345" stroke="#22aee7" stroke-width="26"/><path d="M142 112 Q155 123 170 112" fill="none" stroke="#071d38" stroke-width="6"/></g>
-<g transform="translate(405 345)" filter="url(#shadow)"><rect x="0" y="25" width="430" height="205" rx="42" fill="url(#bus)" stroke="#071d38" stroke-width="12"/><rect x="35" y="58" width="360" height="95" rx="18" fill="#7bd7ef" stroke="#071d38" stroke-width="9"/><path d="M48 70 H205 V143 H48Z" fill="#176b9b" opacity=".82"/><path d="M215 70 H382 V143 H215Z" fill="#0e4e78" opacity=".82"/><rect x="35" y="164" width="360" height="17" rx="8" fill="#e94a29"/><circle cx="92" cy="232" r="43" fill="#182132" stroke="#fff" stroke-width="10"/><circle cx="345" cy="232" r="43" fill="#182132" stroke="#fff" stroke-width="10"/><circle cx="92" cy="232" r="16" fill="#9aa6b4"/><circle cx="345" cy="232" r="16" fill="#9aa6b4"/><path d="M300 25 L430 25 L430 110 Q400 85 370 85 Q335 85 300 105Z" fill="#fff" opacity=".9"/></g>
-<path d="M70 625 Q270 570 475 625 T880 600" fill="none" stroke="#fff" stroke-width="28" stroke-linecap="round" opacity=".9"/>
-<text x="450" y="625" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="27" fill="#071d38">ORARI • FERMATE • PERCORSI DEL TUO TERRITORIO</text>
+<rect width="900" height="1100" fill="url(#sky)"/><rect width="900" height="1100" fill="url(#dots)"/>
+<!-- paint splashes -->
+<g opacity=".95"><circle cx="45" cy="115" r="70" fill="#ffd400"/><circle cx="80" cy="75" r="18" fill="#ffd400"/><circle cx="150" cy="150" r="13" fill="#ffd400"/><circle cx="830" cy="170" r="62" fill="#63f52e"/><circle cx="785" cy="95" r="12" fill="#63f52e"/><circle cx="865" cy="285" r="16" fill="#63f52e"/><circle cx="160" cy="315" r="75" fill="#ffcf00"/><circle cx="740" cy="80" r="34" fill="#111b29"/></g>
+<path d="M-20 215 Q190 100 370 220 T930 165" fill="none" stroke="#fff" stroke-width="18" opacity=".35"/>
+<!-- city / station -->
+<g opacity=".9" fill="#15384f"><path d="M0 690V535h70v155zM70 690V485h75v205zM145 690V555h55v135zM200 690V450h90v240zM290 690V525h65v165zM355 690V470h80v220zM435 690V540h65v150zM500 690V420h100v270zM600 690V500h65v190zM665 690V455h85v235zM750 690V525h65v165zM815 690V475h85v215z"/></g>
+<g fill="#ffd94a" opacity=".8"><circle cx="105" cy="530" r="4"/><circle cx="120" cy="560" r="4"/><circle cx="235" cy="500" r="4"/><circle cx="255" cy="530" r="4"/><circle cx="390" cy="520" r="4"/><circle cx="530" cy="470" r="4"/><circle cx="550" cy="510" r="4"/><circle cx="700" cy="505" r="4"/><circle cx="785" cy="560" r="4"/></g>
+<!-- graffiti title -->
+<g filter="url(#shadow)" font-family="Arial Black, Impact, sans-serif" font-weight="900">
+<text x="450" y="180" text-anchor="middle" font-size="124" fill="#fff" stroke="#07121f" stroke-width="18" paint-order="stroke">FLASH</text>
+<text x="500" y="300" text-anchor="middle" font-size="138" fill="#ffd400" stroke="#07121f" stroke-width="18" paint-order="stroke">MyBus</text>
+</g>
+<!-- crown -->
+<path d="M620 92l22 34 34-42 10 48 40-25-17 62H615z" fill="#ffd400" stroke="#07121f" stroke-width="10"/>
+<!-- commuter -->
+<g transform="translate(35 420)" filter="url(#shadow)">
+<path d="M80 80 Q95 5 175 8 Q250 18 270 90 Q215 52 145 63Z" fill="#101a27"/>
+<circle cx="165" cy="105" r="72" fill="#d9a17b"/>
+<path d="M116 112 Q132 126 150 112" fill="none" stroke="#071d38" stroke-width="6"/>
+<path d="M92 92 Q62 92 55 122 M238 92 Q268 92 275 122" fill="none" stroke="#ff3f9d" stroke-width="22" stroke-linecap="round"/>
+<circle cx="60" cy="122" r="29" fill="#ff3f9d" stroke="#071d38" stroke-width="9"/><circle cx="270" cy="122" r="29" fill="#ff3f9d" stroke="#071d38" stroke-width="9"/>
+<path d="M92 182 Q165 145 238 182 L310 520 H10Z" fill="#edf2f5"/>
+<path d="M120 210 L55 510 M210 210 L280 510" stroke="#1e2b42" stroke-width="35"/>
+<path d="M90 210 L35 175" stroke="#d8e0e5" stroke-width="20"/>
+<rect x="188" y="240" width="75" height="125" rx="12" transform="rotate(10 188 240)" fill="#101b29" stroke="#fff" stroke-width="5"/>
+<rect x="198" y="251" width="55" height="98" rx="5" transform="rotate(10 198 251)" fill="#24bff2"/>
+<path d="M207 270h35M205 290h40M203 312h32" stroke="#fff" stroke-width="5"/>
+</g>
+<!-- bus -->
+<g transform="translate(300 485)" filter="url(#shadow)">
+<path d="M35 85 Q35 25 110 18 H505 Q575 18 600 85 V365 Q600 405 560 405 H55 Q15 405 15 365V105Q15 85 35 85Z" fill="url(#bus)" stroke="#07121f" stroke-width="13"/>
+<rect x="65" y="65" width="455" height="165" rx="24" fill="url(#glass)" stroke="#07121f" stroke-width="11"/>
+<path d="M82 82h185v132H82z" fill="#166d99" opacity=".75"/><path d="M282 82h220v132H282z" fill="#0b4e79" opacity=".78"/>
+<path d="M268 70v155" stroke="#d8f6ff" stroke-width="6" opacity=".7"/>
+<rect x="65" y="250" width="455" height="23" rx="11" fill="#ef4b2d"/>
+<rect x="375" y="26" width="170" height="48" rx="8" fill="#07121f"/>
+<text x="460" y="59" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="27" fill="#ffd400">MUVIBUS</text>
+<text x="450" y="300" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="24" fill="#fff">STAV</text>
+<text x="450" y="330" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="24" fill="#fff">STAV</text>
+<rect x="420" y="350" width="72" height="26" rx="5" fill="#ffd400"/><text x="456" y="369" text-anchor="middle" font-family="Arial" font-weight="900" font-size="15" fill="#111">MI1254</text>
+<circle cx="125" cy="400" r="62" fill="#172333" stroke="#fff" stroke-width="13"/><circle cx="125" cy="400" r="23" fill="#9aa6b4"/>
+<circle cx="495" cy="400" r="62" fill="#172333" stroke="#fff" stroke-width="13"/><circle cx="495" cy="400" r="23" fill="#9aa6b4"/>
+</g>
+<!-- foreground street -->
+<path d="M0 930 Q200 875 430 935 T900 910V1100H0Z" fill="#092b40"/>
+<path d="M0 930 Q220 875 440 935 T900 910" fill="none" stroke="#fff" stroke-width="35" opacity=".9"/>
+<!-- banner -->
+<g filter="url(#shadow)"><path d="M80 825 Q450 790 820 830 L790 940 Q450 915 110 945Z" fill="#fff"/>
+<text x="450" y="875" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="35" fill="#101820">Orari, fermate e percorsi</text>
+<text x="450" y="920" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="35" fill="#101820">del tuo territorio</text></g>
+<!-- paint drips -->
+<g fill="#00aef0"><circle cx="35" cy="1000" r="22"/><circle cx="70" cy="1040" r="12"/><circle cx="830" cy="1010" r="28"/><circle cx="875" cy="1060" r="14"/></g>
 </svg>
