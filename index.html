@@ -33,20 +33,17 @@ main{max-width:680px;margin:auto;padding:0 0 96px!important}
 <div class="field"><label class="label">Partenza</label><div class="position"><span class="dot"></span><div style="flex:1"><strong id="originText">Usa la mia posizione</strong><div class="small" id="coordText">Il GPS individuerà automaticamente il punto di partenza.</div></div></div><button class="btn secondary" id="gpsBtn" style="margin-top:9px">📍 Usa posizione GPS</button></div>
 <div class="field"><label class="label" for="destination">🎯 Destinazione</label><input id="destination" autocomplete="off" placeholder="Es. Stazione di Magenta, Milano, via Roma..."></div>
 <div id="planFields" class="hidden">
-<div class="field"><label class="label">🚏 Da dove vuoi partire?</label>
-<div class="choice-row" id="originChoices">
-<label class="choice"><input type="radio" name="originMode" value="gps"> 📍 Usa posizione attuale (GPS)</label>
-<label class="choice"><input type="radio" name="originMode" value="address"> ✏️ Inserisci un indirizzo</label>
-<label class="choice"><input type="radio" name="originMode" value="map"> 🗺️ Scegli dalla mappa</label>
-</div>
-<div id="originAddressField" class="field hidden"><input id="plannedOrigin" autocomplete="off" placeholder="Es. Marcallo, via Alessandro Volta..."></div>
-<div id="originMapField" class="field hidden"><button class="btn secondary" id="mapOriginBtn" type="button">🗺️ Apri Google Maps per scegliere la partenza</button><div class="small" style="margin-top:7px">Dopo aver scelto il punto in Google Maps, puoi usare l'indirizzo del punto selezionato come partenza.</div></div>
-<div id="originGpsField" class="field hidden"><div class="position"><span class="dot"></span><div style="flex:1"><strong id="plannedGpsText">Posizione attuale</strong><div class="small" id="plannedGpsCoords">Premi il pulsante per rilevare la posizione.</div></div></div><button class="btn secondary" id="plannedGpsBtn" type="button" style="margin-top:9px">📍 Rileva posizione GPS</button></div>
+<div class="field"><label class="label" for="plannedOrigin">🚏 Luogo di partenza</label>
+<input id="plannedOrigin" autocomplete="off" placeholder="Scrivi il luogo o l'indirizzo di partenza...">
+<button class="btn secondary" id="plannedGpsBtn" type="button" style="margin-top:9px">📍 Usa la mia posizione GPS</button>
+<div id="originGpsField" class="field hidden"><div class="position"><span class="dot"></span><div style="flex:1"><strong id="plannedGpsText">Posizione attuale</strong><div class="small" id="plannedGpsCoords">Premi il pulsante per rilevare la posizione.</div></div></div></div>
 </div>
 <div class="field"><label class="label">Quando?</label><div class="plan-fields"><input id="travelDate" type="date" aria-label="Data del viaggio"><input id="travelTime" type="time" aria-label="Ora del viaggio"></div></div><div class="choice-row"><label class="choice"><input type="radio" name="when" value="depart" checked> Partire alle</label><label class="choice"><input type="radio" name="when" value="arrive"> Arrivare entro</label></div></div>
 <button class="btn primary" id="searchBtn">🔎 Trova il percorso migliore</button><div class="status" id="status">Per un viaggio immediato usiamo il GPS. Per un viaggio programmato puoi indicare una partenza diversa.</div></section>
 <section class="card hidden" id="resultsCard"><div class="section-head"><div class="section-icon">⭐</div><div><h2>Soluzione migliore</h2><div class="small" id="resultSummary"></div></div></div><div id="resultList"></div><div class="notice">Per i viaggi programmati la partenza viene usata come punto scelto da te, non come posizione GPS. Il vincolo “Arrivare entro” viene mantenuto nella richiesta del viaggio; il collegamento Google Maps viene usato come fallback.</div></section>
-<section class="card hidden" id="arrivalCard"><div class="section-head"><div class="section-icon">🔔</div><div><h2>Avviso di arrivo</h2><div class="small">Ti avvisiamo prima dell'ultima fermata.</div></div></div><label class="notify-toggle"><input type="checkbox" id="arrivalNotify"><span></span><b>Avvisami quando sto per arrivare</b></label><div class="small" id="arrivalStatus">L'avviso si attiverà quando il percorso avrà identificato la fermata finale.</div><button class="btn secondary" id="voiceTest" style="margin-top:10px">🔊 Prova voce</button></section>
+<section class="card hidden" id="arrivalCard"><div class="section-head"><div class="section-icon">🔔</div><div><h2>Avviso di arrivo</h2><div class="small">Ti avvisiamo prima dell'ultima fermata.</div></div></div><label class="notify-toggle"><input type="checkbox" id="arrivalNotify"><span></span><b>Avvisami quando sto per arrivare</b></label><div class="small" id="arrivalStatus">L'avviso si attiverà quando il percorso avrà identificato la fermata finale.</div><button class="btn secondary" id="voiceTest" style="margin-top:10px">🔊 Prova voce</button>
+<button class="btn secondary" id="resetDataBtn" type="button" style="margin-top:10px">🗑️ Azzera dati</button>
+<div class="small" style="margin-top:7px">Cancella impostazioni, linea seguita, segnalazioni e risultati del viaggio da questo dispositivo.</div></section>
 <section class="card interest-card" id="interestCard">
 <div class="section-head"><div class="section-icon">⭐</div><div><h2>La mia linea di interesse</h2><div class="small">Segui la linea che usi più spesso e ricevi solo gli avvisi che ti riguardano.</div><div class="interest-badge" id="anonymousBadge">👤 Utente anonimo</div></div></div>
 <div class="field"><label class="label" for="interestLine">Linea abituale</label><div class="interest-grid"><input id="interestLine" autocomplete="off" placeholder="Es. Z646"><button class="btn primary" id="saveInterestBtn" type="button">⭐ Segui linea</button></div></div>
@@ -81,43 +78,28 @@ function initDate(){const d=new Date();d.setMinutes(d.getMinutes()+5);$('travelD
 $('nowMode').onclick=()=>{$('nowMode').classList.add('active');$('planMode').classList.remove('active');$('planFields').classList.add('hidden');$('originText').textContent=pos?'Posizione GPS rilevata':'Usa la mia posizione';$('coordText').textContent=pos?pos.lat.toFixed(5)+', '+pos.lon.toFixed(5):'Il GPS individuerà automaticamente il punto di partenza.';status('Viaggio adesso: useremo la tua posizione GPS.')};
 $('planMode').onclick=()=>{$('planMode').classList.add('active');$('nowMode').classList.remove('active');$('planFields').classList.remove('hidden');status('Viaggio programmato: scegli una sola modalità di partenza, poi giorno e ora.');};
 $('gpsBtn').onclick=()=>{if(!navigator.geolocation){status('Questo dispositivo non supporta il GPS.');return}status('Rilevo la posizione…');navigator.geolocation.getCurrentPosition(p=>{pos={lat:p.coords.latitude,lon:p.coords.longitude};$('originText').textContent='Posizione GPS rilevata';$('coordText').textContent=pos.lat.toFixed(5)+', '+pos.lon.toFixed(5);$('gpsBtn').textContent='✓ Posizione acquisita';status('Posizione acquisita. Ora inserisci la destinazione.')},e=>status(e.code===1?'Permesso GPS negato. Abilita la posizione nel browser.':'Non riesco a rilevare la posizione. Riprova.'),{enableHighAccuracy:true,timeout:15000,maximumAge:30000})};
-function setOriginMode(mode){
-  document.querySelectorAll('input[name="originMode"]').forEach(r=>r.checked=r.value===mode);
-  $('originAddressField').classList.toggle('hidden',mode!=='address');
-  $('originMapField').classList.toggle('hidden',mode!=='map');
-  $('originGpsField').classList.toggle('hidden',mode!=='gps');
-  if(mode==='address'){$('plannedOrigin').focus();status('Inserisci l’indirizzo di partenza.')}
-  if(mode==='map')status('Apri Google Maps e scegli il punto di partenza. Puoi poi usare l’indirizzo del punto selezionato.')
-  if(mode==='gps')status('Usa la posizione attuale del GPS come punto di partenza.')
-}
-document.querySelectorAll('input[name="originMode"]').forEach(r=>r.onchange=()=>setOriginMode(r.value));
 $('plannedGpsBtn').onclick=()=>{if(!navigator.geolocation){status('Questo dispositivo non supporta il GPS.');return}status('Rilevo la posizione attuale…');navigator.geolocation.getCurrentPosition(p=>{pos={lat:p.coords.latitude,lon:p.coords.longitude};originPoint={...pos,name:'Posizione GPS'};$('plannedGpsText').textContent='Posizione GPS rilevata';$('plannedGpsCoords').textContent=pos.lat.toFixed(5)+', '+pos.lon.toFixed(5);status('Posizione GPS acquisita come partenza programmata.')},e=>status(e.code===1?'Permesso GPS negato. Abilita la posizione nel browser.':'Non riesco a rilevare la posizione. Riprova.'),{enableHighAccuracy:true,timeout:15000,maximumAge:30000})};
 function openGoogleMapsApp(webUrl){ if(window.FlashMyBusAndroid && typeof window.FlashMyBusAndroid.openGoogleMaps==='function'){ window.FlashMyBusAndroid.openGoogleMaps(webUrl); } else { window.location.href=webUrl; } }
-$('mapOriginBtn').onclick=()=>{const q=$('destination').value.trim()||'Italia';const url='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);openGoogleMapsApp(url);status('Apro l’app Google Maps per scegliere la partenza.')};
+
 async function geocode(q){const r=await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=it&q='+encodeURIComponent(q),{headers:{Accept:'application/json'}});if(!r.ok)throw new Error('geocoding');const a=await r.json();if(!a.length)throw new Error('destinazione');return{lat:Number(a[0].lat),lon:Number(a[0].lon),name:a[0].display_name}}
 $('searchBtn').onclick=async()=>{
  const planned=$('planMode').classList.contains('active');
  const destination=$('destination').value.trim();
  if(!destination){status('Inserisci una destinazione.');$('destination').focus();return}
  if(planned){
-   const originMode=document.querySelector('input[name="originMode"]:checked')?.value;
-   if(!originMode){status('Scegli come impostare la partenza: GPS, indirizzo oppure mappa.');return}
-   if(originMode==='address'&&!$('plannedOrigin').value.trim()){status('Inserisci l’indirizzo di partenza.');$('plannedOrigin').focus();return}
-   if(originMode==='gps'&&!originPoint){status('Premi “Rileva posizione GPS” per impostare la partenza.');return}
+   const plannedOrigin=$('plannedOrigin').value.trim();
+   if(!plannedOrigin&&!originPoint){status('Scrivi il luogo di partenza oppure premi “Usa la mia posizione GPS”.');$('plannedOrigin').focus();return}
  }else if(!pos){status('Prima premi “Usa posizione GPS”.');return}
  status(planned?'Cerco partenza, destinazione e preparo il viaggio programmato…':'Cerco destinazione e preparo la ricerca del trasporto pubblico…');
  $('searchBtn').disabled=true;
  try{
    const plannedOrigin=$('plannedOrigin').value.trim();
-   const originMode=document.querySelector('input[name="originMode"]:checked')?.value;
    let originError=false,destinationError=false;
    if(planned){
-     if(originMode==='address'){
+     if(plannedOrigin){
        try{originPoint=await geocode(plannedOrigin)}catch(e){originError=true;originPoint={name:plannedOrigin}}
-     }else if(originMode==='gps'){
+     }else if(originPoint){
        originPoint={...originPoint,name:'Posizione GPS'};
-     }else if(originMode==='map'){
-       if(!originPoint) originPoint={name:plannedOrigin||'Punto scelto su Google Maps'};
      }
    }else{
      originPoint={...pos,name:'Posizione GPS'};
@@ -191,6 +173,20 @@ $('saveInterestBtn').onclick=saveInterest;
 $('interestNotify').onchange=()=>{const line=localStorage.getItem('flashmybus_interest_line');if(!line&&$('interestNotify').checked){$('interestNotify').checked=false;$('interestStatus').textContent='Prima scegli la tua linea di interesse.';return}localStorage.setItem('flashmybus_interest_notify',$('interestNotify').checked?'1':'0');if(line)$('interestStatus').textContent='Linea '+line+' seguita. '+($('interestNotify').checked?'Avvisi ritardi attivati.':'Avvisi ritardi disattivati.')};
 $('clearInterestBtn').onclick=()=>{localStorage.removeItem('flashmybus_interest_line');localStorage.removeItem('flashmybus_interest_notify');$('interestLine').value='';$('interestNotify').checked=false;$('interestStatus').textContent='Nessuna linea seguita. Quando una corsa verrà identificata automaticamente, potremo proporre di seguirla con un solo tocco.';showDelayBoard()};
 $('requestNotifyBtn').onclick=async()=>{if(window.FlashMyBusAndroid&&typeof window.FlashMyBusAndroid.requestNotifications==='function'){window.FlashMyBusAndroid.requestNotifications();$('interestStatus').textContent='Richiesta di autorizzazione alle notifiche inviata ad Android. Scegli “Consenti” nella finestra di sistema.';setTimeout(()=>{const ok=typeof window.FlashMyBusAndroid.notificationsAvailable==='function'&&window.FlashMyBusAndroid.notificationsAvailable();$('interestStatus').textContent=ok?'Notifiche di sistema abilitate.':'Notifiche non ancora abilitate. Premi di nuovo “Attiva notifiche” se necessario.'},1800);return}if(!('Notification'in window)){$('interestStatus').textContent='Le notifiche di sistema non sono disponibili su questo dispositivo.';return}const p=await Notification.requestPermission();$('interestStatus').textContent=p==='granted'?'Notifiche di sistema abilitate.':'Notifiche non abilitate.'};
+function resetAppData(){
+  stopArrivalWatch();
+  try{localStorage.clear()}catch(e){}
+  pos=null;originPoint=null;destinationPoint=null;finalStop=null;alertDone=false;
+  $('destination').value='';$('plannedOrigin').value='';$('interestLine').value='';$('interestNotify').checked=false;$('arrivalNotify').checked=false;
+  $('resultsCard').classList.add('hidden');$('arrivalCard').classList.add('hidden');$('planFields').classList.add('hidden');
+  $('planMode').classList.remove('active');$('nowMode').classList.add('active');
+  $('originText').textContent='Usa la mia posizione';$('coordText').textContent='Il GPS individuerà automaticamente il punto di partenza.';
+  $('gpsBtn').textContent='📍 Usa posizione GPS';$('status').textContent='Dati azzerati. Puoi iniziare un nuovo viaggio.';
+  $('interestStatus').textContent='Nessuna linea seguita. Quando una corsa verrà identificata automaticamente, potremo proporre di seguirla con un solo tocco.';
+  $('anonymousBadge').textContent='👤 Utente anonimo';$('delayBoard').classList.add('hidden');$('delayStatus').classList.add('hidden');
+  initDate();window.scrollTo({top:0,behavior:'smooth'});
+}
+$('resetDataBtn').onclick=()=>{if(confirm('Vuoi davvero azzerare tutti i dati di FlashMyBus su questo dispositivo?'))resetAppData()};
 loadInterest();showDelayBoard();
 </script><script>document.addEventListener('DOMContentLoaded',()=>{const go=id=>{const e=document.getElementById(id);if(e)e.scrollIntoView({behavior:'smooth',block:'start'})};const activate=id=>{document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));document.getElementById(id)?.classList.add('active')};const safeGps=()=>{document.getElementById('gpsBtn')?.click();go('travelCard')};document.getElementById('quickSearch')?.addEventListener('click',()=>{go('travelCard');activate('navLines')});document.getElementById('quickStops')?.addEventListener('click',()=>{safeGps();document.getElementById('status').textContent='Rilevo la tua posizione per aiutarti a cercare le fermate vicine.';activate('navStops')});document.getElementById('quickFav')?.addEventListener('click',()=>{go('interestCard');activate('navFav')});document.getElementById('quickMaps')?.addEventListener('click',()=>{if(typeof openGoogleMapsApp==='function')openGoogleMapsApp('https://www.google.com/maps/')});document.getElementById('navHome')?.addEventListener('click',()=>{window.scrollTo({top:0,behavior:'smooth'});activate('navHome')});document.getElementById('navStops')?.addEventListener('click',()=>{safeGps();activate('navStops')});document.getElementById('navLines')?.addEventListener('click',()=>{go('travelCard');activate('navLines')});document.getElementById('navFav')?.addEventListener('click',()=>{go('interestCard');activate('navFav')});document.getElementById('navMore')?.addEventListener('click',()=>{go('arrivalCard');activate('navMore')})});</script>
 
