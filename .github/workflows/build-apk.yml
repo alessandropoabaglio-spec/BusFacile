@@ -78,6 +78,30 @@ jobs:
           p.write_text(s)
           PY
           grep -ni "setGeolocationEnabled" "$MAIN"
+
+          # FIX SCHERMATA NERA: rendering WebView stabile su dispositivi recenti.
+          python3 - "$MAIN" <<'PY'
+          from pathlib import Path
+          import sys
+          p=Path(sys.argv[1]); s=p.read_text()
+          imp="import android.view.View"
+          lines=s.splitlines()
+          pkg=next(i for i,line in enumerate(lines) if line.startswith("package "))
+          if imp not in s: lines.insert(pkg+1,imp)
+          s="\n".join(lines)+("\n" if s.endswith("\n") else "")
+          anchor="webView.settings.setGeolocationEnabled(true)"
+          patch="""\n          // FLASHMYBUS_RENDER_FIX_START
+          webView.settings.javaScriptEnabled = true
+          webView.settings.domStorageEnabled = true
+          webView.settings.allowFileAccess = true
+          webView.settings.allowContentAccess = true
+          webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+          webView.setBackgroundColor(android.graphics.Color.rgb(8, 11, 18))
+          // FLASHMYBUS_RENDER_FIX_END"""
+          if "FLASHMYBUS_RENDER_FIX_START" not in s: s=s.replace(anchor,anchor+patch,1)
+          p.write_text(s)
+          PY
+          grep -n "FLASHMYBUS_RENDER_FIX" "$MAIN"
           python3 - "$MAIN" <<'PY'
           import pathlib, re, sys
           p = pathlib.Path(sys.argv[1])
