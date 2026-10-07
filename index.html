@@ -129,7 +129,24 @@ function openGoogleTransit(){
    ?destinationPoint.lat+','+destinationPoint.lon
    :$('destination').value.trim();
  if(!origin||!destination)return;
- const url='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(origin)+'&destination='+encodeURIComponent(destination)+'&travelmode=transit&transit_mode=bus';
+ const planned=$('planMode').classList.contains('active');
+ let url;
+ if(planned){
+   const date=$('travelDate').value, time=$('travelTime').value;
+   const when=document.querySelector('input[name="when"]:checked')?.value||'depart';
+   if(date&&time){
+     const localDate=new Date(date+'T'+time+':00');
+     const epoch=Math.floor(localDate.getTime()/1000);
+     const mode=when==='arrive'?1:0;
+     const data='!4m6!4m5!2m3!6e'+mode+'!7e2!8j'+epoch+'!3e3';
+     url='https://www.google.com/maps/dir/'+encodeURIComponent(origin)+'/'+encodeURIComponent(destination)+'/data='+data;
+     $('status').textContent=(when==='arrive'?'Arrivo entro ':'Partenza alle ')+time+' del '+date+'. Apertura del percorso programmato in Google Maps…';
+   }else{
+     url='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(origin)+'&destination='+encodeURIComponent(destination)+'&travelmode=transit&transit_mode=bus';
+   }
+ }else{
+   url='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(origin)+'&destination='+encodeURIComponent(destination)+'&travelmode=transit&transit_mode=bus';
+ }
  openGoogleMapsApp(url);
 }
 $('arrivalNotify').onchange=()=>{if($('arrivalNotify').checked){if(!finalStop){$('arrivalStatus').textContent='Attivata: appena il percorso fornirà la fermata finale, FlashMyBus inizierà a controllare la posizione.';return}startArrivalWatch()}else{stopArrivalWatch();$('arrivalStatus').textContent='Avviso disattivato.'}};
