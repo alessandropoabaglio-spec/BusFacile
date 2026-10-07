@@ -77,31 +77,93 @@ a:not(.btn){color:var(--blue)}
 @media(max-width:400px){.interest-grid{grid-template-columns:1fr}.interest-grid .btn{width:100%}}
 
 .mural-visual{margin:0 0 14px;border-radius:24px;overflow:hidden;border:1px solid #b9dff2;box-shadow:var(--shadow);background:#dff4ff}.mural-visual svg{display:block;width:100%;height:auto}.mural-visual text{letter-spacing:.4px}
+</style>
+<style id="flashmybus-graffiti-theme">
+:root{
+ --bg:#080b12;--panel:#101722;--panel2:#151d29;--text:#f5f7fb;--muted:#b7c2d0;
+ --blue:#159cff;--cyan:#20d9ff;--green:#19d77a;--yellow:#ffd21c;--pink:#ff3fb4;--purple:#8d55ff;
+ --line:#273446;--shadow:0 18px 45px rgba(0,0,0,.38)
+}
+html,body{background:#080b12;color:var(--text)}
+body{
+ background:
+ radial-gradient(circle at 8% 8%,rgba(0,217,255,.14),transparent 24%),
+ radial-gradient(circle at 92% 16%,rgba(255,42,180,.12),transparent 25%),
+ linear-gradient(180deg,#080b12 0%,#0b1018 55%,#070a0f 100%);
+}
+main{max-width:720px;padding:14px 14px 92px}
+.brand{margin:8px 2px 15px;gap:11px}
+.logo{width:54px;height:54px;border-radius:17px;background:linear-gradient(145deg,#08c9ff,#1264ff);box-shadow:0 0 0 2px #ffffff10,0 8px 25px #008cff55}
+.brand h1{font-size:28px;font-weight:950;letter-spacing:-1.2px;color:#fff;text-shadow:3px 3px 0 #087cff, -1px -1px 0 #111}
+.brand p{color:#aebbd0}
+.top-tag{color:#07140d;border:2px solid #20d77a;background:#1ee37d;border-radius:999px;font-weight:900}
+.mural-visual{border:0;border-radius:22px;background:#090d14;box-shadow:var(--shadow);position:relative}
+.mural-visual:before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,transparent 45%,rgba(0,208,255,.08));pointer-events:none}
+.hero{
+ background:linear-gradient(135deg,#111b2a,#10131e 60%,#15101e);
+ border:1px solid #26374c;border-radius:22px;box-shadow:var(--shadow);padding:19px 18px
+}
+.eyebrow{color:var(--cyan);font-size:11px}
+.hero h2{font-size:25px;color:#fff}
+.hero p{color:#aebbd0}
+.card{background:linear-gradient(145deg,#121a26,#0e141e);border:1px solid #29384b;border-radius:20px;box-shadow:0 12px 32px rgba(0,0,0,.3)}
+.section-icon{background:#17283a;border-color:#2c506d}
+.section-head h2{color:#fff}
+.label{color:#d4deea}
+input,select{background:#0b121b;border-color:#304257;color:#fff}
+input::placeholder{color:#718198}
+input:focus,select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px #20d9ff18}
+.primary{background:linear-gradient(100deg,#10bfff,#116dff);color:#fff;box-shadow:0 8px 24px #008cff40}
+.secondary{background:#17212e;color:#dce8f5;border-color:#34465b}
+.mode{background:#0d151f;border-color:#2b3c50;color:#fff}
+.mode.active{background:linear-gradient(145deg,#0d3150,#111c2c);border-color:#10bfff;box-shadow:0 0 0 1px #10bfff33,0 10px 25px #008cff20}
+.mode small,.small,.hero p,.muted{color:#9eacbf}
+.position,.choice,.notify-toggle,.route-card,.interest-status,.route-placeholder{background:#0c141e;border-color:#2c3e52;color:#dce7f3}
+.stop{border-color:#26384a}.stop strong,.route-card strong{color:#fff}
+.dot{background:#19d77a;box-shadow:0 0 0 5px #19d77a1a}
+.notice{background:#281f0b;color:#f4d66b;border-left-color:#ffd21c}
+.interest-card{background:linear-gradient(145deg,#15152a,#101522);border-color:#423d68}
+.interest-badge{color:#09150f;background:#19d77a;border-color:#19d77a}
+footer{color:#68778b}
+a:not(.btn){color:#20cfff}
 </style></head>
 <!-- FlashMyBus redesigned trip planner: Bus predefinito -->
 <body>
 <main>
 <header class="brand"><div class="logo">🚌</div><div><h1>FLASHMYBUS</h1><p>Il modo più semplice per arrivare dove vuoi.</p></div><div class="top-tag">● GPS</div></header>
-<section class="mural-visual" aria-label="Illustrazione FlashMyBus"><svg viewBox="0 0 680 250" role="img" aria-hidden="true">
-<defs><linearGradient id="muralSky" x1="0" x2="1"><stop offset="0" stop-color="#bdeeff"/><stop offset="1" stop-color="#e9d8ff"/></linearGradient></defs>
-<rect width="680" height="250" rx="24" fill="url(#muralSky)"/>
-<path d="M0 185 Q100 125 205 180 T410 165 T680 155 V250 H0Z" fill="#7ec8d7" opacity=".5"/>
-<path d="M0 205 Q120 150 240 205 T470 190 T680 175 V250 H0Z" fill="#6a7bd8" opacity=".28"/>
-<g transform="translate(385 72)">
-<rect x="0" y="38" width="220" height="92" rx="18" fill="#168bd0"/>
-<rect x="15" y="53" width="72" height="37" rx="8" fill="#dff7ff"/><rect x="96" y="53" width="52" height="37" rx="8" fill="#dff7ff"/><rect x="157" y="53" width="48" height="37" rx="8" fill="#dff7ff"/>
-<circle cx="48" cy="137" r="18" fill="#173e55"/><circle cx="178" cy="137" r="18" fill="#173e55"/>
-<path d="M25 106 H195" stroke="#7de0ff" stroke-width="7" stroke-linecap="round"/>
+<section class="mural-visual" aria-label="FlashMyBus graffiti"><svg viewBox="0 0 680 310" role="img">
+<rect width="680" height="310" rx="22" fill="#080b12"/>
+<g opacity=".95">
+<circle cx="62" cy="52" r="27" fill="#13cfff"/><circle cx="103" cy="35" r="13" fill="#13cfff"/>
+<circle cx="615" cy="62" r="31" fill="#ff36b5"/><circle cx="650" cy="101" r="12" fill="#ff36b5"/>
+<circle cx="550" cy="255" r="24" fill="#8cff20"/><circle cx="592" cy="270" r="10" fill="#8cff20"/>
+<circle cx="92" cy="252" r="23" fill="#ffd21c"/><circle cx="47" cy="272" r="9" fill="#ffd21c"/>
 </g>
-<g transform="translate(115 70)">
-<circle cx="45" cy="31" r="22" fill="#f1b98b"/><path d="M25 29 Q43 0 68 22 L65 35 Q43 18 24 38Z" fill="#173e55"/>
-<path d="M31 53 Q48 43 66 56 L77 116 H17Z" fill="#ff6f61"/><path d="M36 61 L5 101 M61 61 L92 94" stroke="#173e55" stroke-width="10" stroke-linecap="round"/>
-<path d="M38 116 L20 156 M61 116 L78 156" stroke="#173e55" stroke-width="11" stroke-linecap="round"/>
-<path d="M22 18 Q8 35 25 48 M68 18 Q84 33 67 48" fill="none" stroke="#8d4de8" stroke-width="7" stroke-linecap="round"/>
-<path d="M13 7 Q46 -15 77 8" fill="none" stroke="#ffcf4a" stroke-width="7" stroke-linecap="round"/>
+<g fill="none" stroke-linecap="round" opacity=".8">
+<path d="M18 90L82 70M31 108L106 82M568 35L626 20M580 49L653 29" stroke="#fff" stroke-width="5"/>
+<path d="M8 215L125 165M550 135L670 90" stroke="#126dff" stroke-width="10"/>
+<path d="M515 292L648 230M28 300L164 245" stroke="#ff3fb4" stroke-width="7"/>
 </g>
-<text x="28" y="218" font-family="sans-serif" font-size="24" font-weight="900" fill="#173e55">FLASHMYBUS</text>
-<text x="28" y="241" font-family="sans-serif" font-size="12" font-weight="700" fill="#557286">ASPETTA IL BUS • VAI DOVE VUOI</text>
+<g transform="translate(255 83) rotate(-3)">
+<text x="0" y="86" font-family="Impact,Arial Black,sans-serif" font-size="84" font-weight="900" fill="#fff" stroke="#080b12" stroke-width="15" paint-order="stroke">FLASH</text>
+<text x="105" y="151" font-family="Impact,Arial Black,sans-serif" font-size="78" font-weight="900" fill="#ffd21c" stroke="#080b12" stroke-width="14" paint-order="stroke">MYBUS</text>
+<path d="M380 20l16 30 34 4-25 22 7 33-32-17-31 18 6-34-25-21 34-3z" fill="#ffd21c" stroke="#080b12" stroke-width="8"/>
+</g>
+<g transform="translate(60 105)">
+<path d="M0 105 Q20 74 42 105 M6 91 Q21 65 36 91" fill="none" stroke="#8d55ff" stroke-width="9"/>
+<circle cx="23" cy="43" r="23" fill="#d89d73" stroke="#080b12" stroke-width="5"/>
+<path d="M4 42Q21 13 43 38L40 52Q22 31 5 54Z" fill="#111820"/>
+<path d="M8 72Q23 59 39 73L48 137H0Z" fill="#ff4e5b" stroke="#080b12" stroke-width="5"/>
+<path d="M10 82L-18 118M36 82L64 112M12 136L0 174M34 136L48 174" stroke="#101820" stroke-width="10" stroke-linecap="round"/>
+<path d="M-8 20Q22 -3 51 18" fill="none" stroke="#ffd21c" stroke-width="8"/>
+</g>
+<g transform="translate(380 170)">
+<rect x="0" y="30" width="235" height="90" rx="19" fill="#118de1" stroke="#080b12" stroke-width="7"/>
+<rect x="17" y="46" width="68" height="35" rx="8" fill="#dff9ff"/><rect x="94" y="46" width="56" height="35" rx="8" fill="#dff9ff"/><rect x="159" y="46" width="58" height="35" rx="8" fill="#dff9ff"/>
+<path d="M20 98H214" stroke="#64e4ff" stroke-width="7" stroke-linecap="round"/>
+<circle cx="48" cy="127" r="18" fill="#17283a" stroke="#080b12" stroke-width="5"/><circle cx="190" cy="127" r="18" fill="#17283a" stroke="#080b12" stroke-width="5"/>
+</g>
+<text x="28" y="288" font-family="Arial Black,sans-serif" font-size="15" font-weight="900" fill="#fff">ORARI • FERMATE • PERCORSI DEL TUO TERRITORIO</text>
 </svg></section><section class="hero"><div class="eyebrow">Trasporto pubblico intelligente</div><h2>Dimmi dove vuoi andare. Al resto pensiamo noi.</h2><p>Bus selezionato automaticamente. Puoi cambiare modalità di trasporto in qualsiasi momento.</p></section>
 <section class="card"><div class="section-head"><div class="section-icon">🧭</div><div><h2>Come vuoi viaggiare?</h2><div class="small">Puoi partire subito oppure programmare il viaggio.</div></div></div>
 <div class="mode-grid"><button class="mode active" id="nowMode"><span>⚡</span><strong>Viaggio adesso</strong><small>Trova la soluzione migliore in partenza ora</small></button><button class="mode" id="planMode"><span>📅</span><strong>Programma viaggio</strong><small>Scegli giorno e ora per domani o un'altra data</small></button></div></section>
