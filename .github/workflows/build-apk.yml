@@ -8,6 +8,7 @@ on:
       - '.github/workflows/build-apk.yml'
       - 'BusFacileAndroid-progetto-con-compilazione-GitHub.zip'
       - 'index.html'
+      - 'assets/**'
 
 permissions:
   contents: read
@@ -52,7 +53,7 @@ jobs:
           cp -R "$GITHUB_WORKSPACE/assets/." "$WEB_ASSET_DIR/assets/"
           echo "Asset APK aggiornato: $WEB_ASSET"
           echo "Asset grafici APK copiati in: $WEB_ASSET_DIR/assets"
-          test -f "$WEB_ASSET_DIR/assets/fmb-graffiti-1.b64"
+          test -f "$WEB_ASSET_DIR/assets/fmb-graffiti.svg"
           echo "OK: grafica graffiti presente nell'APK"
           grep -q "FLASHMYBUS" "$WEB_ASSET"
           ! grep -qi "Orari STAV" "$WEB_ASSET"
