@@ -305,15 +305,29 @@ geografia:[
 ]};
 const quizSeenKey='flashmybus_quiz_seen_v1',quizStatsKey='flashmybus_quiz_stats_v1';
 function makeQuizVariants(subject,facts,count=1000){
-  const pool=[],seen=new Set(),templates=[
-    (f)=>f[1],(f)=>'Scegli la risposta corretta: '+f[1],(f)=>'Quiz '+subject+': '+f[1],
-    (f)=>'Quale opzione risponde correttamente? '+f[1],(f)=>'Conosci la risposta? '+f[1]
+  const pool=[];
+  const templates=[
+    f=>f[1],
+    f=>'Scegli la risposta corretta: '+f[1],
+    f=>'Quiz '+subject+': '+f[1],
+    f=>'Quale opzione risponde correttamente? '+f[1],
+    f=>'Conosci la risposta? '+f[1]
   ];
   for(let round=0;pool.length<count;round++){
     for(let fi=0;fi<facts.length&&pool.length<count;fi++){
-      const f=facts[fi], text=templates[round%templates.length](f), id=subject+'-'+fi+'-'+round;
-      if(seen.has(text))continue; seen.add(text);
-      pool.push({id,q:text,o:[f[0],f[2],f[3],f[4]],a:0,level:Math.min(5,1+Math.floor(round/5))});
+      const f=facts[fi];
+      const base=[f[0],f[2],f[3],f[4]];
+      const shift=round%4;
+      const options=base.map((_,i)=>base[(i+shift)%4]);
+      const correct=options.indexOf(f[0]);
+      const text=templates[round%templates.length](f);
+      pool.push({
+        id:subject+'-'+fi+'-'+round,
+        q:text,
+        o:options,
+        a:correct,
+        level:Math.min(5,1+Math.floor(round/10))
+      });
     }
   }
   return pool;
