@@ -392,7 +392,7 @@ jobs:
           grep -n -E "FLASHMYBUS_NATIVE_BRIDGE|openGoogleMaps|requestNotifications|showNotification|POST_NOTIFICATIONS" "$MAIN" "$MANIFEST"
 
       - name: Prepara Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Compila APK
         run: |
