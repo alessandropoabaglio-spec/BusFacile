@@ -400,7 +400,7 @@ jobs:
           gradle assembleDebug -Pkotlin.jvm.target.validation.mode=warning
 
       - name: Salva APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: BusFacile-APK
           path: android-project/**/build/outputs/apk/debug/*.apk
